@@ -62,4 +62,4 @@ lint: test license
 .PHONY: license
 license:
 	@echo -e "\n$(YELLOW)Injecting the license$(NC)"
-	./bin/golic inject -c "2022 Absa Group Limited" -t apache2
+	./bin/golic inject verbose -c "2022 Absa Group Limited" -t apache2

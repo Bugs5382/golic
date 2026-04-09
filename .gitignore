@@ -1,5 +1,6 @@
 # Ignore everything
 *
+temp
 
 # But not these files...
 !/.gitignore
