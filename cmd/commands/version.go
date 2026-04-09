@@ -1,12 +1,10 @@
 package commands
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
 )
 
-const version = "v0.8.0"
+const Version = "v0.8.0"
 
 // VersionCmd Show the Golic Version
 func VersionCmd() *cobra.Command {
@@ -15,7 +13,7 @@ func VersionCmd() *cobra.Command {
 		Short: "Print the version number of Golic",
 		Long:  "",
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println(version)
+			cmd.Println(Version)
 		},
 	}
 	return versionCmd
