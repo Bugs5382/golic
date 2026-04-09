@@ -29,7 +29,7 @@ import (
 // Log is the global logger.
 var Log *zerolog.Logger
 
-//init initializes the logger
+// init initializes the logger
 func init() {
 	zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	zerolog.ErrorStackMarshaler = pkgerrors.MarshalStack

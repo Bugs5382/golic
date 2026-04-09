@@ -1,4 +1,4 @@
-//package provides cobra commands
+// package provides cobra commands
 package cmd
 
 /*

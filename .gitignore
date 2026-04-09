@@ -2,18 +2,26 @@
 *
 
 # But not these files...
-!CODEOWNERS
-!LICENSE
-!README.md
 !/.gitignore
-!.licignore
-!.golangci
-!*.yaml
-!Makefile
+
 !*.go
-!go.mod
 !go.sum
+!go.mod
+
+!Makefile
+!*.yaml
+
+!.goreleaser.yml
+!.gitleaks.toml
+!.yamllint
+!.golangci.toml
+!.golic.yaml
+!.licignore
+!CHANGELOG.md
+!CODEOWNERS
+!README.md
+!LICENSE
+!renovate.json
 
 # ...even if they are in subdirectories
 !*/
-
