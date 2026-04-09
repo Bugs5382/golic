@@ -26,7 +26,6 @@ import (
 	"github.com/AbsaOSS/golic/cmd/commands"
 	"github.com/AbsaOSS/golic/cmd/logging"
 	log "github.com/sirupsen/logrus"
-	"github.com/spf13/cobra"
 )
 
 //go:embed .golic.yaml
@@ -34,45 +33,13 @@ var golicConfig string
 
 func main() {
 
-	var verbose bool
-
 	logging.Init()
 
-	var rootCmd = RootCmd()
-
-	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "verbose output")
-
-	rootCmd.AddCommand(commands.VersionCmd())
-	rootCmd.AddCommand(commands.InjectCmd())
-	rootCmd.AddCommand(commands.RemoveCmd())
-
-	if err := rootCmd.Execute(); err != nil {
+	if err := commands.RootCmd().Execute(); err != nil {
 		_, err := fmt.Fprintln(os.Stderr, err)
 		if err != nil {
 			log.Error(err)
 		}
 		os.Exit(1)
 	}
-}
-
-func RootCmd() *cobra.Command {
-	var rootCmd = &cobra.Command{
-		Use:   "golic",
-		Short: "golic license injector",
-		Long:  ``,
-		PersistentPreRun: func(cmd *cobra.Command, args []string) {
-			logging.LogCommandExecution(cmd, args)
-		},
-		RunE: func(cmd *cobra.Command, args []string) error {
-			if len(args) == 0 {
-				_ = cmd.Help()
-				return fmt.Errorf("no parameters included")
-			}
-			return nil
-		},
-		PersistentPostRun: func(cmd *cobra.Command, args []string) {
-			os.Exit(0)
-		},
-	}
-	return rootCmd
 }
