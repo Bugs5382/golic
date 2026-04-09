@@ -3,6 +3,7 @@ package commands
 import (
 	"fmt"
 
+	"github.com/AbsaOSS/golic/helpers"
 	"github.com/spf13/cobra"
 )
 
@@ -37,21 +38,21 @@ func InjectCmd() *cobra.Command {
 	}
 
 	// flags
-	injectCmd.Flags().BoolVarP(&InjectOptions.ModifiedExitStatus, "modified-exit", "x", false,
+	injectCmd.Flags().BoolVarP(&helpers.InjectOptions.ModifiedExitStatus, "modified-exit", "x", false,
 		"If enabled, exits with status 1 when any file is modified. The settings is used by CI")
-	injectCmd.Flags().BoolVarP(&InjectOptions.Dry, "dry", "d", false, "dry run")
+	injectCmd.Flags().BoolVarP(&helpers.InjectOptions.Dry, "dry", "d", false, "dry run")
 
-	injectCmd.Flags().StringVarP(&InjectOptions.Template, "template", "t", "", "license key")
-	injectCmd.Flags().StringVarP(&InjectOptions.LicIgnore, "licignore", "l", ".licignore",
+	injectCmd.Flags().StringVarP(&helpers.InjectOptions.Template, "template", "t", "", "license key")
+	injectCmd.Flags().StringVarP(&helpers.InjectOptions.LicIgnore, "licignore", "l", ".licignore",
 		".licignore path")
 	injectCmd.Flags().StringVarP(
-		&InjectOptions.Copyright,
+		&helpers.InjectOptions.Copyright,
 		"copyright",
 		"c",
-		fmt.Sprintf("%d %s", Year, Company),
+		fmt.Sprintf("%d %s", helpers.Year, helpers.Company),
 		"copyright holder and year for the license header",
 	)
-	injectCmd.Flags().StringVarP(&InjectOptions.ConfigPath, "config-path", "p", ".golic.yaml",
+	injectCmd.Flags().StringVarP(&helpers.InjectOptions.ConfigPath, "config-path", "p", ".golic.yaml",
 		"path to the local configuration overriding config-url")
 
 	return injectCmd

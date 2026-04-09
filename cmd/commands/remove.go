@@ -3,6 +3,7 @@ package commands
 import (
 	"fmt"
 
+	"github.com/AbsaOSS/golic/helpers"
 	"github.com/spf13/cobra"
 )
 
@@ -27,15 +28,15 @@ func RemoveCmd() *cobra.Command {
 	}
 
 	// flags
-	removeCmd.Flags().BoolVarP(&InjectOptions.Dry, "dry", "d", false, "dry run")
-	removeCmd.Flags().StringVarP(&InjectOptions.LicIgnore, "licignore", "l", ".licignore", ".licignore path")
-	removeCmd.Flags().StringVarP(&InjectOptions.Template, "template", "t", "apache2", "license key")
-	removeCmd.Flags().StringVarP(&InjectOptions.Copyright, "copyright",
+	removeCmd.Flags().BoolVarP(&helpers.InjectOptions.Dry, "dry", "d", false, "dry run")
+	removeCmd.Flags().StringVarP(&helpers.InjectOptions.LicIgnore, "licignore", "l", ".licignore", ".licignore path")
+	removeCmd.Flags().StringVarP(&helpers.InjectOptions.Template, "template", "t", "apache2", "license key")
+	removeCmd.Flags().StringVarP(&helpers.InjectOptions.Copyright, "copyright",
 		"c",
-		fmt.Sprintf("%d %s", Year, Company),
+		fmt.Sprintf("%d %s", helpers.Year, helpers.Company),
 		"copyright holder and year for the license header",
 	)
-	removeCmd.Flags().StringVarP(&InjectOptions.ConfigPath, "config-path", "p", ".golic.yaml", "path to the local configuration overriding config-url")
+	removeCmd.Flags().StringVarP(&helpers.InjectOptions.ConfigPath, "config-path", "p", ".golic.yaml", "path to the local configuration overriding config-url")
 
 	return removeCmd
 }
