@@ -2,9 +2,7 @@ package commands
 
 import (
 	"fmt"
-	"os"
 
-	"github.com/AbsaOSS/golic/cmd/logging"
 	"github.com/spf13/cobra"
 )
 
@@ -13,22 +11,22 @@ func RootCmd() *cobra.Command {
 
 	// command
 	var rootCmd = &cobra.Command{
-		Use:   "golic",
-		Short: "golic license injector",
-		Long:  ``,
+		Use:           "golic",
+		Short:         "golic license injector",
+		Long:          ``,
+		SilenceUsage:  true, // Prevents automatic help print on error
+		SilenceErrors: true, // We will handle the error printing in main()
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
-			logging.LogCommandExecution(cmd, args)
+			// cmd.Printf("Executing: %s %v\n", cmd.CommandPath(), args)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) == 0 {
 				_ = cmd.Help()
-				return fmt.Errorf("no parameters included")
+				return fmt.Errorf("%s", "no arguments passed")
 			}
 			return nil
 		},
-		PersistentPostRun: func(cmd *cobra.Command, args []string) {
-			os.Exit(0)
-		},
+		PersistentPostRun: func(cmd *cobra.Command, args []string) {},
 	}
 
 	// flags

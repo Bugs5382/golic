@@ -25,7 +25,7 @@ import (
 
 	"github.com/AbsaOSS/golic/cmd/commands"
 	"github.com/AbsaOSS/golic/cmd/logging"
-	log "github.com/sirupsen/logrus"
+	"github.com/enescakir/emoji"
 )
 
 //go:embed .golic.yaml
@@ -36,10 +36,7 @@ func main() {
 	logging.Init()
 
 	if err := commands.RootCmd().Execute(); err != nil {
-		_, err := fmt.Fprintln(os.Stderr, err)
-		if err != nil {
-			log.Error(err)
-		}
+		_, _ = fmt.Fprintf(os.Stderr, "%v  Error: %v\n", emoji.Bomb, err)
 		os.Exit(1)
 	}
 }
