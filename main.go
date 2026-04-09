@@ -38,30 +38,13 @@ func main() {
 
 	logging.Init()
 
-	var rootCmd = &cobra.Command{
-		Use:   "golic",
-		Short: "golic license injector",
-		Long:  ``,
-		PersistentPreRun: func(cmd *cobra.Command, args []string) {
-			logging.LogCommandExecution(cmd, args)
-		},
-		Run: func(cmd *cobra.Command, args []string) {
-			if len(args) == 0 {
-				logging.LogShowError("no parameters included")
-				_ = cmd.Help()
-				os.Exit(0)
-			}
-		},
-		PersistentPostRun: func(cmd *cobra.Command, args []string) {
-			os.Exit(0)
-		},
-	}
+	var rootCmd = RootCmd()
 
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "verbose output")
 
-	rootCmd.AddCommand(commands.VersionCmd)
-	rootCmd.AddCommand(commands.InjectCmd)
-	rootCmd.AddCommand(commands.RemoveCmd)
+	rootCmd.AddCommand(commands.VersionCmd())
+	rootCmd.AddCommand(commands.InjectCmd())
+	rootCmd.AddCommand(commands.RemoveCmd())
 
 	if err := rootCmd.Execute(); err != nil {
 		_, err := fmt.Fprintln(os.Stderr, err)
@@ -70,4 +53,26 @@ func main() {
 		}
 		os.Exit(1)
 	}
+}
+
+func RootCmd() *cobra.Command {
+	var rootCmd = &cobra.Command{
+		Use:   "golic",
+		Short: "golic license injector",
+		Long:  ``,
+		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+			logging.LogCommandExecution(cmd, args)
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if len(args) == 0 {
+				_ = cmd.Help()
+				return fmt.Errorf("no parameters included")
+			}
+			return nil
+		},
+		PersistentPostRun: func(cmd *cobra.Command, args []string) {
+			os.Exit(0)
+		},
+	}
+	return rootCmd
 }
