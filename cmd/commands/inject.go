@@ -12,9 +12,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func InjectCmd() *cobra.Command {
+func InjectCmd(masterConfig string) *cobra.Command {
 
 	var injectOptions helpers.Options
+	injectOptions.MasterConfig = masterConfig
 
 	// command
 	var injectCmd = &cobra.Command{
@@ -98,13 +99,10 @@ func InjectCmd() *cobra.Command {
 			s.Stop()
 
 			if exitCode != 0 {
-				// Handle error
+				return fmt.Errorf("something went wrong")
 			}
 
 			return nil
-		},
-		PersistentPostRun: func(cmd *cobra.Command, args []string) {
-			os.Exit(0)
 		},
 	}
 

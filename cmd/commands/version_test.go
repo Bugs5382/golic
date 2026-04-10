@@ -3,6 +3,7 @@ package commands
 import (
 	"testing"
 
+	"github.com/AbsaOSS/golic/helpers"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -16,7 +17,7 @@ func TestVersion(t *testing.T) {
 		err := root.Execute()
 
 		assert.NoError(t, err)
-		assert.Contains(t, out.String(), Version)
+		assert.Contains(t, out.String(), helpers.Version)
 	})
 
 	t.Run("should fail if any flags are passed", func(t *testing.T) {

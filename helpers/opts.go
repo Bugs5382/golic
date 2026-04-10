@@ -4,6 +4,7 @@ import "time"
 
 type LicenseCommandType int
 
+const Version = "v0.8.0"
 const (
 	LicenseInject LicenseCommandType = 0
 	LicenseRemove LicenseCommandType = 1
@@ -17,6 +18,7 @@ type Options struct {
 	SearchPath         string
 	Template           string
 	ModifiedExitStatus bool
+	MasterConfig       string
 	Type               LicenseCommandType
 	Verbose            bool
 }

@@ -11,5 +11,6 @@ type Process struct {
 	Ctx  context.Context
 	Opts helpers.Options
 
-	ignore gitignore.GitIgnore
+	ignore   gitignore.GitIgnore
+	modified bool
 }

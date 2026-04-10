@@ -11,9 +11,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func RemoveCmd() *cobra.Command {
+func RemoveCmd(masterConfig string) *cobra.Command {
 
 	var removeOptions helpers.Options
+	removeOptions.MasterConfig = masterConfig
 
 	// command
 	var removeCmd = &cobra.Command{

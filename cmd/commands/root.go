@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func RootCmd() *cobra.Command {
+func RootCmd(masterConfig string) *cobra.Command {
 	var verbose bool
 
 	// command
@@ -14,16 +14,12 @@ func RootCmd() *cobra.Command {
 		Use:   "golic",
 		Short: "golic license injector",
 		Long:  ``,
-		PersistentPreRun: func(cmd *cobra.Command, args []string) {
-			// cmd.Printf("Executing: %s %v\n", cmd.CommandPath(), args)
-		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) == 0 {
 				return fmt.Errorf("%s", "no arguments passed")
 			}
 			return nil
 		},
-		PersistentPostRun: func(cmd *cobra.Command, args []string) {},
 	}
 
 	// flags
@@ -31,8 +27,8 @@ func RootCmd() *cobra.Command {
 
 	// sub commands
 	rootCmd.AddCommand(VersionCmd())
-	rootCmd.AddCommand(InjectCmd())
-	rootCmd.AddCommand(RemoveCmd())
+	rootCmd.AddCommand(InjectCmd(masterConfig))
+	rootCmd.AddCommand(RemoveCmd(masterConfig))
 
 	return rootCmd
 }

@@ -13,6 +13,8 @@ func NewInject(ctx context.Context, options helpers.Options) *Process {
 	return &Process{
 		Ctx:  ctx,
 		Opts: options,
+
+		modified: false,
 	}
 }
 
@@ -43,8 +45,10 @@ func (u *Process) String() string {
 }
 
 func (u *Process) ExitCode() int {
-	//TODO implement me
-	panic("implement ExitCode()")
+	if u.Opts.ModifiedExitStatus && u.modified {
+		return 1
+	}
+	return 0
 }
 
 //

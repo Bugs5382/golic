@@ -8,7 +8,7 @@ import (
 
 func SetupTest() (*cobra.Command, *bytes.Buffer) {
 	// 1. Get a fresh instance of the command
-	root := RootCmd()
+	root := RootCmd("")
 	b := new(bytes.Buffer)
 
 	// 2. Redirect output and error streams to the buffer
