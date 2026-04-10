@@ -27,7 +27,6 @@ func RemoveCmd() *cobra.Command {
 			// Check if the file actually exists
 			if _, err := os.Stat(configPath); err != nil {
 				if os.IsNotExist(err) {
-					_ = cmd.Help() // Print usage instructions
 					return fmt.Errorf("config file not found: ensure '.golic.yaml' exists in the current" +
 						" directory or provide a valid path")
 				}
@@ -47,7 +46,6 @@ func RemoveCmd() *cobra.Command {
 			// Check if the file actually exists
 			if _, err := os.Stat(ignorePath); err != nil {
 				if os.IsNotExist(err) {
-					_ = cmd.Help() // Print usage instructions
 					return fmt.Errorf("ignore file not found: ensure '.licignore' exists in the current" +
 						" directory or provide a valid path")
 				}
@@ -59,9 +57,7 @@ func RemoveCmd() *cobra.Command {
 			removeOptions.LicIgnore = ignorePath
 
 			templateSelected := helpers.RemoveOptions.Template
-			print(templateSelected)
 			if templateSelected == "" {
-				_ = cmd.Help() // Print usage instructions
 				return fmt.Errorf("licence template not provided")
 			}
 
