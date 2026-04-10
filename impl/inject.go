@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/AbsaOSS/golic/helpers"
+	"github.com/denormal/go-gitignore"
 	"github.com/enescakir/emoji"
 	log "github.com/sirupsen/logrus"
 )
@@ -19,40 +20,31 @@ func (u *Process) Run() (err error) {
 	// debug commands
 	log.Debugf("%s reading config path: %s", emoji.OpenBook, u.Opts.ConfigPath)
 	log.Debugf("%s reading lic ignore path: %s", emoji.OpenBook, u.Opts.LicIgnore)
-	log.Debugf("%s reading search path: %s", emoji.OpenBook, u.Opts.SearchPath)
 	log.Debugf("%s reading template: %s", emoji.OpenBook, u.Opts.Template)
+	log.Debugf("%s reading search path: %s", emoji.OpenBook, u.Opts.SearchPath)
 
-	//u.ignore, err = gitignore.NewFromFile(u.opts.LicIgnore)
-	//if err != nil {
-	//	return err
-	//}
-	//log.Printf("%s reading %s; use --verbose to see details", emoji.OpenBook, aurora.BrightCyan("master config"))
 	//if u.cfg, err = u.readCommonConfig(); err != nil {
 	//	return
 	//}
-	//if _, err = os.Stat(u.opts.ConfigPath); !os.IsNotExist(err) {
-	//	log.Printf("%s reading %s", emoji.OpenBook, aurora.BrightCyan(u.opts.ConfigPath))
-	//	log.Printf("%s overriding %s with %s",
-	//		emoji.ConstructionWorker, aurora.BrightCyan("master config"), aurora.BrightCyan(u.opts.ConfigPath))
-	//	if u.cfg, err = u.readLocalConfig(); err != nil {
-	//		return
-	//	}
-	//} else {
-	//	log.Printf("%s skipping local %s", emoji.FileFolder, aurora.BrightCyan(u.opts.ConfigPath))
-	//	err = nil
-	//}
-	//u.traverse()
+	// TODO Add Debug to output Config File Here... maybe
+
+	u.ignore, err = gitignore.NewFromFile(u.Opts.LicIgnore)
+	if err != nil {
+		return err
+	}
+	// TODO Add Debug to output Ignore File Here... maybe
+
 	return
 }
 
 func (u *Process) String() string {
 	//TODO implement me
-	panic("implement me")
+	panic("implement String()")
 }
 
 func (u *Process) ExitCode() int {
 	//TODO implement me
-	panic("implement me")
+	panic("implement ExitCode()")
 }
 
 //
