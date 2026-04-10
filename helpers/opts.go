@@ -4,7 +4,6 @@ import "time"
 
 type LicenseCommandType int
 
-const Version = "v0.8.0"
 const (
 	LicenseInject LicenseCommandType = 0
 	LicenseRemove LicenseCommandType = 1
@@ -23,7 +22,9 @@ type Options struct {
 	Verbose            bool
 }
 
-var InjectOptions Options
-var RemoveOptions Options
+var Version = "local" // value can be overridden by ldflags
 var Year = time.Now().Year()
 var Company = "MyCompany"
+
+var InjectOptions Options
+var RemoveOptions Options
