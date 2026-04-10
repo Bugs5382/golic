@@ -14,11 +14,13 @@ type Options struct {
 	Copyright          string
 	Dry                bool
 	ConfigPath         string
+	SearchPath         string
 	Template           string
 	ModifiedExitStatus bool
 	Type               LicenseCommandType
 }
 
 var InjectOptions Options
+var RemoveOptions Options
 var Year = time.Now().Year()
 var Company = "MyCompany"

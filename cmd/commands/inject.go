@@ -37,7 +37,7 @@ func InjectCmd() *cobra.Command {
 			}
 
 			// Ensure the resolved path is saved back to your options so downstream code uses it
-			helpers.InjectOptions.ConfigPath = configPath
+			injectOptions.ConfigPath = configPath
 
 			// ignore lic
 			ignorePath := helpers.InjectOptions.LicIgnore
@@ -57,20 +57,29 @@ func InjectCmd() *cobra.Command {
 			}
 
 			// Ensure the resolved path is saved back to your options so downstream code uses it
-			helpers.InjectOptions.LicIgnore = ignorePath
+			injectOptions.LicIgnore = ignorePath
 
-			// mark the injection type as 'inject'
+			templateSelected := helpers.InjectOptions.Template
+			print(templateSelected)
+			if templateSelected == "" {
+				_ = cmd.Help() // Print usage instructions
+				return fmt.Errorf("licence template not provided")
+			}
+
+			// dry run options
+			injectOptions.Dry = helpers.InjectOptions.Dry
+			// modified status
+			injectOptions.ModifiedExitStatus = helpers.InjectOptions.ModifiedExitStatus
+			// search dir settings
+			injectOptions.SearchPath = helpers.InjectOptions.SearchPath
+			// we are injecting!
 			injectOptions.Type = 0
 
-			//injectOptions.MasterConfig = masterconfig
-			//injectOptions.Type = update.LicenseInject
-			//i := update.New(ctx, injectOptions)
-			//exitCode = temp.Command(i).MustRun()
-			//if exitCode == 0 {
+			// go ahead and start the inject process!
+
 			//	fmt.Printf(" %s %s\n", emoji.Rocket, aurora.BrightWhite("done"))
-			//} else {
 			//	fmt.Printf(" %s %s\n", emoji.FaceScreamingInFear, aurora.BrightWhite("found files with missing a license, exit"))
-			//}
+
 			return nil
 		},
 		PersistentPostRun: func(cmd *cobra.Command, args []string) {
@@ -81,15 +90,17 @@ func InjectCmd() *cobra.Command {
 	// flags
 	injectCmd.Flags().BoolVarP(&helpers.InjectOptions.ModifiedExitStatus, "modified-exit", "x", false,
 		"If enabled, exits with status 1 when any file is modified. The settings is used by CI")
-	injectCmd.Flags().BoolVarP(&helpers.InjectOptions.Dry, "dry", "d", false, "dry run")
+	injectCmd.Flags().BoolVarP(&helpers.InjectOptions.Dry, "dry", "d", false, "Dry run")
 
-	injectCmd.Flags().StringVarP(&helpers.InjectOptions.Template, "template", "t", "", "license key")
+	injectCmd.Flags().StringVarP(&helpers.InjectOptions.Template, "template", "t", "", "License key")
 	injectCmd.Flags().StringVarP(&helpers.InjectOptions.LicIgnore, "licignore", "l", ".licignore",
 		".licignore path")
 	injectCmd.Flags().StringVarP(&helpers.InjectOptions.Copyright, "copyright", "c",
-		fmt.Sprintf("%d %s", helpers.Year, helpers.Company), "copyright holder and year for the license header")
+		fmt.Sprintf("%d %s", helpers.Year, helpers.Company), "Copyright holder and year for the license header")
 	injectCmd.Flags().StringVarP(&helpers.InjectOptions.ConfigPath, "config-path", "p", ".golic.yaml",
-		"path to the local configuration overriding config-url")
+		"Path to the local configuration overriding config-url")
+	injectCmd.Flags().StringVarP(&helpers.InjectOptions.SearchPath, "include-only", "i", "",
+		"Used to execute only in reading into the path/directory provided")
 
 	return injectCmd
 }
