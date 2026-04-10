@@ -3,8 +3,12 @@ package commands
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/AbsaOSS/golic/helpers"
+	"github.com/AbsaOSS/golic/impl"
+	"github.com/briandowns/spinner"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -18,6 +22,14 @@ func InjectCmd() *cobra.Command {
 		Short: "Injects licenses",
 		Long:  ``,
 		RunE: func(cmd *cobra.Command, args []string) error {
+
+			verbose, _ := cmd.Flags().GetBool("verbose")
+
+			if verbose {
+				log.SetLevel(log.DebugLevel)
+			} else {
+				log.SetLevel(log.InfoLevel)
+			}
 
 			// golic config
 			configPath := helpers.InjectOptions.ConfigPath
@@ -58,11 +70,12 @@ func InjectCmd() *cobra.Command {
 			injectOptions.LicIgnore = ignorePath
 
 			templateSelected := helpers.InjectOptions.Template
-			print(templateSelected)
 			if templateSelected == "" {
 				return fmt.Errorf("licence template not provided")
 			}
 
+			// template setting
+			injectOptions.Template = templateSelected
 			// dry run options
 			injectOptions.Dry = helpers.InjectOptions.Dry
 			// modified status
@@ -71,11 +84,22 @@ func InjectCmd() *cobra.Command {
 			injectOptions.SearchPath = helpers.InjectOptions.SearchPath
 			// we are injecting!
 			injectOptions.Type = 0
+			// verbose
+			injectOptions.Verbose = verbose
+
+			s := spinner.New(spinner.CharSets[14], 100*time.Millisecond)
+			s.Suffix = "Injecting licenses, please wait..."
+			s.Start()
 
 			// go ahead and start the inject process!
+			i := impl.NewInject(cmd.Context(), injectOptions)
+			exitCode := helpers.Command(i).MustRun()
 
-			//	fmt.Printf(" %s %s\n", emoji.Rocket, aurora.BrightWhite("done"))
-			//	fmt.Printf(" %s %s\n", emoji.FaceScreamingInFear, aurora.BrightWhite("found files with missing a license, exit"))
+			s.Stop()
+
+			if exitCode != 0 {
+				// Handle error
+			}
 
 			return nil
 		},

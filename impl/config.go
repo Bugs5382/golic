@@ -1,4 +1,4 @@
-package struc
+package impl
 
 type Config struct {
 	Golic struct {
@@ -11,7 +11,7 @@ type Config struct {
 	} `yaml:"golic"`
 }
 
-func Init() Config {
+func InitConfig() Config {
 	cfg := Config{}
 	return cfg
 }

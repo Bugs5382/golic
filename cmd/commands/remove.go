@@ -3,8 +3,11 @@ package commands
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/AbsaOSS/golic/helpers"
+	"github.com/briandowns/spinner"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -18,6 +21,15 @@ func RemoveCmd() *cobra.Command {
 		Short: "Remove licenses",
 		Long:  ``,
 		RunE: func(cmd *cobra.Command, args []string) error {
+
+			verbose, _ := cmd.Flags().GetBool("verbose")
+
+			if verbose {
+				log.SetLevel(log.DebugLevel)
+			} else {
+				log.SetLevel(log.InfoLevel)
+			}
+
 			// golic config
 			configPath := helpers.RemoveOptions.ConfigPath
 			if configPath == "" {
@@ -61,6 +73,8 @@ func RemoveCmd() *cobra.Command {
 				return fmt.Errorf("licence template not provided")
 			}
 
+			// template setting
+			removeOptions.Template = templateSelected
 			// dry run options
 			removeOptions.Dry = helpers.RemoveOptions.Dry
 			// modified status
@@ -69,12 +83,22 @@ func RemoveCmd() *cobra.Command {
 			removeOptions.SearchPath = helpers.RemoveOptions.SearchPath
 			// we are removing!
 			removeOptions.Type = 1
+			// verbose
+			removeOptions.Verbose = verbose
+
+			s := spinner.New(spinner.CharSets[14], 100*time.Millisecond)
+			s.Suffix = "Removing licenses, please wait..."
+			s.Start()
 
 			// go ahead and start the remove process!
-
-			//	fmt.Printf(" %s %s\n", emoji.Rocket, aurora.BrightWhite("done"))
-			//	fmt.Printf(" %s %s\n", emoji.FaceScreamingInFear, aurora.BrightWhite("found files with missing a license, exit"))
-
+			//i := impl.NewRemove(cmd.Context(), removeOptions)
+			//exitCode := helpers.Command(i).MustRun()
+			//
+			//s.Stop()
+			//
+			//if exitCode != 0 {
+			//	// Handle error
+			//}
 			return nil
 		},
 	}

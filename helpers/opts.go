@@ -18,6 +18,7 @@ type Options struct {
 	Template           string
 	ModifiedExitStatus bool
 	Type               LicenseCommandType
+	Verbose            bool
 }
 
 var InjectOptions Options

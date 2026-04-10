@@ -30,4 +30,10 @@ func TestInject(t *testing.T) {
 		assert.ErrorContains(t, err, "licence template not provided")
 	})
 
+	t.Run("inject with mit", func(t *testing.T) {
+		out.Reset()
+		root.SetArgs([]string{"inject", "-p", "../../.golic.yaml", "-l", "../../.licignore", "-t", "mit"})
+		_ = root.Execute()
+	})
+
 }

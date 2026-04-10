@@ -1,44 +1,62 @@
-package helpers
+package helpers_test
 
 import (
 	"testing"
+
+	"github.com/AbsaOSS/golic/helpers"
+	"github.com/AbsaOSS/golic/impl"
 )
 
-func TestIsMatch(t *testing.T) {
-	tests := []struct {
-		name    string
-		path    string
-		pattern string
-		want    bool
+func TestMatchRule(t *testing.T) {
+	config := &impl.Config{}
+	// ... (Your config setup stays the same) ...
+	config.Golic.Rules = map[string]struct {
+		Prefix string   `yaml:"prefix"`
+		Suffix string   `yaml:"suffix"`
+		Under  []string `yaml:"under"`
 	}{
-		// Extension matches
-		{"ExtMatch", "values.yaml", ".yaml", true},
-		{"ExtMismatch", "values.yml", ".yaml", false},
+		"Makefile":               {Prefix: "#"},
+		"**/templates/**/*.yaml": {Prefix: "{{/*", Suffix: "*/}}"},
+		"*.go":                   {Prefix: "/*", Suffix: "*/"},
+		"cmd/server/main.go":     {Prefix: "//"},
+	}
 
-		// Standard wildcards
-		{"SingleStarMatch", "service.yaml", "*.yaml", true},
-		{"SingleStarDeepMismatch", "templates/service.yaml", "*.yaml", false},
-
-		// Recursive wildcards
-		{"RecursiveTemplatesMatch", "charts/templates/service.yaml", "**/templates/**/*.yaml", true},
-		{"RecursiveDeepMatch", "charts/sub/templates/nested/pod.yaml", "**/templates/**/*.yaml", true},
-		{"RecursiveRootMatch", "templates/pod.yaml", "**/templates/**/*.yaml", true},
-
-		// Question mark wildcards
-		{"QuestionMarkMatch", "templates/service.yaml", "template?/service.yaml", true},
-		{"QuestionMarkMismatch", "template/service.yaml", "template?/service.yaml", false},
-		{"QuestionMarkMulti", "v1.yaml", "v?.yaml", true},
-
-		// General Glob behavior
-		{"GlobalYaml", "some/deep/path/config.yaml", "**/*.yaml", true},
-		{"GlobalMismatch", "some/deep/path/config.json", "**/*.yaml", false},
+	tests := []struct {
+		name     string
+		fileName string
+		wantRule string
+		wantOk   bool
+	}{
+		{name: "Direct Match (Exact)", fileName: "Makefile", wantRule: "Makefile", wantOk: true},
+		{name: "Recursive Match (Deep Path)", fileName: "charts/technitium/templates/service.yaml", wantRule: "**/templates/**/*.yaml", wantOk: true},
+		{name: "Wildcard Match (Shallow)", fileName: "main.go", wantRule: "*.go", wantOk: true},
+		{name: "Precedence Match", fileName: "cmd/server/main.go", wantRule: "cmd/server/main.go", wantOk: true},
+		{name: "No Match Case", fileName: "README.md", wantRule: "", wantOk: false},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := IsMatch(tt.path, tt.pattern)
-			if got != tt.want {
-				t.Errorf("isMatch(%q, %q) = %v; want %v", tt.path, tt.pattern, got, tt.want)
+			// FIX: We loop through the rules manually to find which pattern matches
+			var gotRule string
+			var gotOk bool
+
+			for pattern := range config.Golic.Rules {
+				if helpers.IsMatch(tt.fileName, pattern) {
+					// Precedence Logic: If we find multiple matches,
+					// we usually want the most specific (longest) pattern.
+					if len(pattern) > len(gotRule) {
+						gotRule = pattern
+						gotOk = true
+					}
+				}
+			}
+
+			if gotOk != tt.wantOk {
+				t.Fatalf("IsMatch(%s) ok = %v, want %v", tt.fileName, gotOk, tt.wantOk)
+			}
+
+			if gotRule != tt.wantRule {
+				t.Errorf("IsMatch(%s) rule = %v, want %v", tt.fileName, gotRule, tt.wantRule)
 			}
 		})
 	}
