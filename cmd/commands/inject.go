@@ -5,8 +5,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/AbsaOSS/golic/helpers"
 	"github.com/AbsaOSS/golic/impl"
+	"github.com/AbsaOSS/golic/internal"
 	"github.com/briandowns/spinner"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -14,7 +14,7 @@ import (
 
 func InjectCmd(masterConfig string) *cobra.Command {
 
-	var injectOptions helpers.Options
+	var injectOptions internal.Options
 	injectOptions.MasterConfig = masterConfig
 
 	// command
@@ -33,7 +33,7 @@ func InjectCmd(masterConfig string) *cobra.Command {
 			}
 
 			// golic config
-			configPath := helpers.InjectOptions.ConfigPath
+			configPath := internal.InjectOptions.ConfigPath
 			if configPath == "" {
 				configPath = ".golic.yaml"
 			}
@@ -52,7 +52,7 @@ func InjectCmd(masterConfig string) *cobra.Command {
 			injectOptions.ConfigPath = configPath
 
 			// ignore lic
-			ignorePath := helpers.InjectOptions.LicIgnore
+			ignorePath := internal.InjectOptions.LicIgnore
 			if ignorePath == "" {
 				ignorePath = ".licignore"
 			}
@@ -70,7 +70,7 @@ func InjectCmd(masterConfig string) *cobra.Command {
 			// Ensure the resolved path is saved back to your options so downstream code uses it
 			injectOptions.LicIgnore = ignorePath
 
-			templateSelected := helpers.InjectOptions.Template
+			templateSelected := internal.InjectOptions.Template
 			if templateSelected == "" {
 				return fmt.Errorf("licence template not provided")
 			}
@@ -78,11 +78,11 @@ func InjectCmd(masterConfig string) *cobra.Command {
 			// template setting
 			injectOptions.Template = templateSelected
 			// dry run options
-			injectOptions.Dry = helpers.InjectOptions.Dry
+			injectOptions.Dry = internal.InjectOptions.Dry
 			// modified status
-			injectOptions.ModifiedExitStatus = helpers.InjectOptions.ModifiedExitStatus
+			injectOptions.ModifiedExitStatus = internal.InjectOptions.ModifiedExitStatus
 			// search dir settings
-			injectOptions.SearchPath = helpers.InjectOptions.SearchPath
+			injectOptions.SearchPath = internal.InjectOptions.SearchPath
 			// we are injecting!
 			injectOptions.Type = 0
 			// verbose
@@ -94,7 +94,7 @@ func InjectCmd(masterConfig string) *cobra.Command {
 
 			// go ahead and start the inject process!
 			i := impl.NewInject(cmd.Context(), injectOptions)
-			exitCode := helpers.Command(i).MustRun()
+			exitCode := internal.Command(i).MustRun()
 
 			s.Stop()
 
@@ -107,18 +107,18 @@ func InjectCmd(masterConfig string) *cobra.Command {
 	}
 
 	// flags
-	injectCmd.Flags().BoolVarP(&helpers.InjectOptions.ModifiedExitStatus, "modified-exit", "x", false,
+	injectCmd.Flags().BoolVarP(&internal.InjectOptions.ModifiedExitStatus, "modified-exit", "x", false,
 		"If enabled, exits with status 1 when any file is modified. The settings is used by CI")
-	injectCmd.Flags().BoolVarP(&helpers.InjectOptions.Dry, "dry", "d", false, "Dry run")
+	injectCmd.Flags().BoolVarP(&internal.InjectOptions.Dry, "dry", "d", false, "Dry run")
 
-	injectCmd.Flags().StringVarP(&helpers.InjectOptions.Template, "template", "t", "", "License key")
-	injectCmd.Flags().StringVarP(&helpers.InjectOptions.LicIgnore, "licignore", "l", ".licignore",
+	injectCmd.Flags().StringVarP(&internal.InjectOptions.Template, "template", "t", "", "License key")
+	injectCmd.Flags().StringVarP(&internal.InjectOptions.LicIgnore, "licignore", "l", ".licignore",
 		".licignore path")
-	injectCmd.Flags().StringVarP(&helpers.InjectOptions.Copyright, "copyright", "c",
-		fmt.Sprintf("%d %s", helpers.Year, helpers.Company), "Copyright holder and year for the license header")
-	injectCmd.Flags().StringVarP(&helpers.InjectOptions.ConfigPath, "config-path", "p", ".golic.yaml",
+	injectCmd.Flags().StringVarP(&internal.InjectOptions.Copyright, "copyright", "c",
+		fmt.Sprintf("%d %s", internal.Year, internal.Company), "Copyright holder and year for the license header")
+	injectCmd.Flags().StringVarP(&internal.InjectOptions.ConfigPath, "config-path", "p", ".golic.yaml",
 		"Path to the local configuration overriding config-url")
-	injectCmd.Flags().StringVarP(&helpers.InjectOptions.SearchPath, "include-only", "i", "",
+	injectCmd.Flags().StringVarP(&internal.InjectOptions.SearchPath, "include-only", "i", "",
 		"Used to execute only in reading into the path/directory provided")
 
 	return injectCmd

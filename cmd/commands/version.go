@@ -1,7 +1,7 @@
 package commands
 
 import (
-	"github.com/AbsaOSS/golic/helpers"
+	"github.com/AbsaOSS/golic/internal/buildinfo"
 	"github.com/spf13/cobra"
 )
 
@@ -12,7 +12,7 @@ func VersionCmd() *cobra.Command {
 		Short: "Print the version number of Golic",
 		Long:  "",
 		Run: func(cmd *cobra.Command, args []string) {
-			cmd.Println(helpers.Version)
+			cmd.Println(buildinfo.Version)
 		},
 	}
 	return versionCmd

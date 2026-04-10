@@ -1,4 +1,4 @@
-package helpers
+package internal
 
 import "time"
 
@@ -22,7 +22,6 @@ type Options struct {
 	Verbose            bool
 }
 
-var Version = "local" // value can be overridden by ldflags
 var Year = time.Now().Year()
 var Company = "MyCompany"
 

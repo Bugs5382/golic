@@ -3,13 +3,13 @@ package impl
 import (
 	"context"
 
-	"github.com/AbsaOSS/golic/helpers"
+	"github.com/AbsaOSS/golic/internal"
 	"github.com/denormal/go-gitignore"
 	"github.com/enescakir/emoji"
 	log "github.com/sirupsen/logrus"
 )
 
-func NewInject(ctx context.Context, options helpers.Options) *Process {
+func NewInject(ctx context.Context, options internal.Options) *Process {
 	return &Process{
 		Ctx:  ctx,
 		Opts: options,
@@ -54,9 +54,9 @@ func (u *Process) ExitCode() int {
 //
 //func (u *InjectProcess) String() string {
 //	//switch u.opts.Type {
-//	//case helpers.LicenseInject:
+//	//case pkg.LicenseInject:
 //	//	return aurora.BrightCyan("inject").String()
-//	//case helpers.LicenseRemove:
+//	//case pkg.LicenseRemove:
 //	//	return aurora.BrightCyan("remove").String()
 //	//}
 //	//return aurora.BrightRed("ERROR, unrecognised command").String()
@@ -81,7 +81,7 @@ func (u *Process) ExitCode() int {
 //func (u *InjectProcess) traverse() {
 //	//skipped := 0
 //	//visited := 0
-//	//p := func(path string, i gitignore.GitIgnore, o helpers.Options, config *Config) (err error) {
+//	//p := func(path string, i gitignore.GitIgnore, o pkg.Options, config *Config) (err error) {
 //	//	if !i.Ignore(path) {
 //	//		var skip bool
 //	//		symbol := ""
@@ -122,17 +122,17 @@ func (u *Process) ExitCode() int {
 //	//fmt.Printf("\n %s %v/%v %s\n\n", emoji.Fire, aurora.BrightYellow(visited-skipped), aurora.BrightWhite(visited), aurora.BrightYellow("changed"))
 //}
 //
-//func update(path string, o helpers.Options, config *Config) (err error, skip bool) {
+//func update(path string, o pkg.Options, config *Config) (err error, skip bool) {
 //	//switch o.Type {
-//	//case helpers.LicenseInject:
+//	//case pkg.LicenseInject:
 //	//	return inject(path, o, config)
-//	//case helpers.LicenseRemove:
+//	//case pkg.LicenseRemove:
 //	//	return remove(path, o, config)
 //	//}
 //	//return fmt.Errorf("invalid license type"), true
 //}
 //
-//func inject(path string, o helpers.Options, config *Config) (err error, skip bool) {
+//func inject(path string, o pkg.Options, config *Config) (err error, skip bool) {
 //	//source, err := read(path)
 //	//if err != nil {
 //	//	return err, false
@@ -160,7 +160,7 @@ func (u *Process) ExitCode() int {
 //	return
 //}
 //
-//func remove(path string, o helpers.Options, config *Config) (err error, skip bool) {
+//func remove(path string, o pkg.Options, config *Config) (err error, skip bool) {
 //	//source, err := read(path)
 //	//if err != nil {
 //	//	return err, false
@@ -176,7 +176,7 @@ func (u *Process) ExitCode() int {
 //	return nil, true
 //}
 //
-//func RemoveFromFile(path string, o helpers.Options, source string, license string, err error) error {
+//func RemoveFromFile(path string, o pkg.Options, source string, license string, err error) error {
 ///*	if !o.Dry {
 //		source = strings.Replace(source, license, "", 1)
 //		err = os.WriteFile(path, []byte(source), os.ModeExclusive)
@@ -196,7 +196,7 @@ func (u *Process) ExitCode() int {
 //	return "", false
 //}
 //
-//func getCommentedLicense(config *Config, o helpers.Options, file string) (string, error) {
+//func getCommentedLicense(config *Config, o pkg.Options, file string) (string, error) {
 //	//var ok bool
 //	//var template string
 //	//var rule string

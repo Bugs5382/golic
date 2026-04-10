@@ -1,4 +1,4 @@
-package impl
+package internal
 
 type Config struct {
 	Golic struct {

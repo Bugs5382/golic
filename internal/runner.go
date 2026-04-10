@@ -1,4 +1,4 @@
-package helpers
+package internal
 
 type Service interface {
 	Run() error

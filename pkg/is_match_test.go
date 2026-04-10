@@ -1,14 +1,14 @@
-package helpers_test
+package pkg_test
 
 import (
 	"testing"
 
-	"github.com/AbsaOSS/golic/helpers"
-	"github.com/AbsaOSS/golic/impl"
+	"github.com/AbsaOSS/golic/internal"
+	"github.com/AbsaOSS/golic/pkg"
 )
 
 func TestMatchRule(t *testing.T) {
-	config := &impl.Config{}
+	config := &internal.Config{}
 	// ... (Your config setup stays the same) ...
 	config.Golic.Rules = map[string]struct {
 		Prefix string   `yaml:"prefix"`
@@ -41,7 +41,7 @@ func TestMatchRule(t *testing.T) {
 			var gotOk bool
 
 			for pattern := range config.Golic.Rules {
-				if helpers.IsMatch(tt.fileName, pattern) {
+				if pkg.IsMatch(tt.fileName, pattern) {
 					// Precedence Logic: If we find multiple matches,
 					// we usually want the most specific (longest) pattern.
 					if len(pattern) > len(gotRule) {
