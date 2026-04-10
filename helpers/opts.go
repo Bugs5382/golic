@@ -16,7 +16,6 @@ type Options struct {
 	ConfigPath         string
 	Template           string
 	ModifiedExitStatus bool
-	MasterConfig       string
 	Type               LicenseCommandType
 }
 
