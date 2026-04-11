@@ -24,6 +24,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/AbsaOSS/golic/internal"
@@ -89,22 +90,39 @@ func (u *Process) readCommonConfig() (c *Config, err error) {
 
 // readLocalConfig Read the local config.
 func (u *Process) readLocalConfig() (*Config, error) {
-	var c = &Config{}
 	var rc = *u.cfg
+
 	yamlFile, err := os.ReadFile(u.Opts.ConfigPath)
 	if err != nil {
-		return nil, nil
+		return &rc, nil
 	}
+
+	var c = &Config{}
 	err = yaml.Unmarshal(yamlFile, c)
 	if err != nil {
-		return nil, nil
+		return &rc, nil
 	}
-	for k, v := range c.Golic.Licenses {
-		rc.Golic.Licenses[k] = v
+
+	if len(c.Golic.Licenses) > 0 {
+		if rc.Golic.Licenses == nil {
+			rc.Golic.Licenses = c.Golic.Licenses
+		} else {
+			for k, v := range c.Golic.Licenses {
+				rc.Golic.Licenses[k] = v
+			}
+		}
 	}
-	for k, v := range c.Golic.Rules {
-		rc.Golic.Rules[k] = v
+
+	if len(c.Golic.Rules) > 0 {
+		if rc.Golic.Rules == nil {
+			rc.Golic.Rules = c.Golic.Rules
+		} else {
+			for k, v := range c.Golic.Rules {
+				rc.Golic.Rules[k] = v
+			}
+		}
 	}
+
 	return &rc, nil
 }
 
@@ -206,16 +224,10 @@ func RemoveFromFile(path string, o internal.Options, source string, license stri
 }
 
 // matchRule Match Rule
-func matchRule(config *Config, fileName string) (rule string, ok bool) {
-	if _, ok = config.Golic.Rules[fileName]; ok {
-		return fileName, ok
-	}
-	for k := range config.Golic.Rules {
-		if pkg.IsMatch(fileName, k) {
-			return k, true
-		}
-	}
-	return "", false
+func matchRule(config *Config, path string) (rule string, ok bool) {
+	rule = getRule(config, path)
+	_, ok = config.Golic.Rules[rule]
+	return rule, ok
 }
 
 // getCommentedLicense Get Commented License File
@@ -278,17 +290,29 @@ func findHeaderAndFooter(lines []string, match string) (header, footer string) {
 
 // getRule Get Rule for Match
 func getRule(config *Config, path string) (rule string) {
+	keys := make([]string, 0, len(config.Golic.Rules))
 	for k := range config.Golic.Rules {
-		if pkg.IsMatch(path, k) {
+		keys = append(keys, k)
+	}
+
+	sort.Slice(keys, func(i, j int) bool {
+		if len(keys[i]) != len(keys[j]) {
+			return len(keys[i]) > len(keys[j])
+		}
+		return keys[i] < keys[j]
+	})
+
+	cleanPath := filepath.ToSlash(path)
+
+	for _, k := range keys {
+		if pkg.IsMatch(cleanPath, k) {
 			return k
 		}
 	}
 
-	// Fallbacks
 	rule = filepath.Ext(path)
 	if rule == "" {
 		rule = filepath.Base(path)
 	}
-
 	return
 }

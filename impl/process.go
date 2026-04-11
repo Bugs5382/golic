@@ -27,6 +27,7 @@ import (
 	"github.com/AbsaOSS/golic/internal"
 	"github.com/denormal/go-gitignore"
 	"github.com/enescakir/emoji"
+	"github.com/goccy/go-yaml"
 	"github.com/logrusorgru/aurora"
 	"github.com/rs/zerolog/log"
 )
@@ -67,9 +68,9 @@ func (u *Process) Run() (err error) {
 
 	if _, err = os.Stat(u.Opts.ConfigPath); !os.IsNotExist(err) {
 		log.Debug().Msgf("%s reading %s", emoji.OpenBook, aurora.BrightCyan(u.Opts.ConfigPath))
-		log.Debug().Msgf("%s overriding %s with %s",
-			emoji.ConstructionWorker, aurora.BrightCyan("master config"),
-			aurora.BrightCyan(u.Opts.ConfigPath))
+		log.Debug().Msgf("%s merging %s with %s",
+			emoji.ConstructionWorker, aurora.BrightCyan(u.Opts.ConfigPath),
+			aurora.BrightCyan("master config"))
 		if u.cfg, err = u.readLocalConfig(); err != nil {
 			return
 		}
@@ -79,6 +80,14 @@ func (u *Process) Run() (err error) {
 		} else {
 			log.Debug().Msgf("%s skipping local %s", emoji.FileFolder, aurora.BrightCyan(u.Opts.ConfigPath))
 		}
+	}
+
+	if log.Debug().Enabled() {
+		// Marshal the merged config to YAML for a "pretty-print" effect
+		confBytes, _ := yaml.Marshal(u.cfg)
+
+		log.Debug().
+			Msgf("Final Configuration Loaded:\n---\n%s\n---", string(confBytes))
 	}
 
 	u.traverseFiles()
