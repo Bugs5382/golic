@@ -14,7 +14,7 @@ golic inject -c="2026 MyCompany ltd." --dry
 Install the binary using Go 1.16+:
 
 ```bash
-go install github.com/AbsaOSS/golic@latest
+go install github.com/BUgs5382/golic@latest
 golic version
 ```
 
