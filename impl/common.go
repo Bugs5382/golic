@@ -278,16 +278,17 @@ func findHeaderAndFooter(lines []string, match string) (header, footer string) {
 
 // getRule Get Rule for Match
 func getRule(config *Config, path string) (rule string) {
-	fileName := filepath.Base(path)
 	for k := range config.Golic.Rules {
-		matched, _ := filepath.Match(k, fileName)
-		if matched {
+		if pkg.IsMatch(path, k) {
 			return k
 		}
 	}
+
+	// Fallbacks
 	rule = filepath.Ext(path)
 	if rule == "" {
 		rule = filepath.Base(path)
 	}
+
 	return
 }
