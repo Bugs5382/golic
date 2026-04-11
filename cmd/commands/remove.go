@@ -5,6 +5,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/AbsaOSS/golic/impl"
 	"github.com/AbsaOSS/golic/internal"
 	"github.com/briandowns/spinner"
 	log "github.com/sirupsen/logrus"
@@ -33,17 +34,12 @@ func RemoveCmd(masterConfig string) *cobra.Command {
 
 			// golic config
 			configPath := internal.RemoveOptions.ConfigPath
-			if configPath == "" {
-				configPath = ".golic.yaml"
-			}
-
-			// Check if the file actually exists
-			if _, err := os.Stat(configPath); err != nil {
-				if os.IsNotExist(err) {
+			if configPath != "" {
+				_, err := os.ReadFile(configPath)
+				if err != nil {
 					return fmt.Errorf("config file not found: ensure '.golic.yaml' exists in the current" +
 						" directory or provide a valid path")
 				}
-				// Catch any other potential file system errors (e.g., permission denied)
 				return fmt.Errorf("error accessing config file: %w", err)
 			}
 
@@ -88,18 +84,19 @@ func RemoveCmd(masterConfig string) *cobra.Command {
 			removeOptions.Verbose = verbose
 
 			s := spinner.New(spinner.CharSets[14], 100*time.Millisecond)
-			s.Suffix = "Removing licenses, please wait..."
+			s.Suffix = "Injecting licenses, please wait..."
 			s.Start()
 
-			// go ahead and start the remove process!
-			//i := impl.NewRemove(cmd.Context(), removeOptions)
-			//exitCode := pkg.Command(i).MustRun()
-			//
-			//s.Stop()
-			//
-			//if exitCode != 0 {
-			//	// Handle error
-			//}
+			// go ahead and start the inject process!
+			i := impl.ProcessFile(cmd.Context(), removeOptions)
+			exitCode := internal.Command(i).MustRun()
+
+			s.Stop()
+
+			if exitCode != 0 {
+				return fmt.Errorf("something went wrong")
+			}
+
 			return nil
 		},
 	}
@@ -113,8 +110,8 @@ func RemoveCmd(masterConfig string) *cobra.Command {
 	removeCmd.Flags().StringVarP(&internal.RemoveOptions.LicIgnore, "licignore", "l", ".licignore",
 		".licignore path")
 	removeCmd.Flags().StringVarP(&internal.RemoveOptions.Copyright, "copyright", "c",
-		fmt.Sprintf("%d %s", internal.Year, internal.Company), "Copyright holder and year for the license header")
-	removeCmd.Flags().StringVarP(&internal.RemoveOptions.ConfigPath, "config-path", "p", ".golic.yaml",
+		fmt.Sprintf("%d %s", internal.Year, "[Insert Company]"), "Copyright holder and year for the license header")
+	removeCmd.Flags().StringVarP(&internal.RemoveOptions.ConfigPath, "config-path", "p", "",
 		"Path to the local configuration overriding config-url")
 	removeCmd.Flags().StringVarP(&internal.RemoveOptions.SearchPath, "include-only", "i", "",
 		"Used to execute only in reading into the path/directory provided")

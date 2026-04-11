@@ -34,17 +34,12 @@ func InjectCmd(masterConfig string) *cobra.Command {
 
 			// golic config
 			configPath := internal.InjectOptions.ConfigPath
-			if configPath == "" {
-				configPath = ".golic.yaml"
-			}
-
-			// Check if the file actually exists
-			if _, err := os.Stat(configPath); err != nil {
-				if os.IsNotExist(err) {
+			if configPath != "" {
+				_, err := os.ReadFile(configPath)
+				if err != nil {
 					return fmt.Errorf("config file not found: ensure '.golic.yaml' exists in the current" +
 						" directory or provide a valid path")
 				}
-				// Catch any other potential file system errors (e.g., permission denied)
 				return fmt.Errorf("error accessing config file: %w", err)
 			}
 
@@ -93,7 +88,7 @@ func InjectCmd(masterConfig string) *cobra.Command {
 			s.Start()
 
 			// go ahead and start the inject process!
-			i := impl.NewInject(cmd.Context(), injectOptions)
+			i := impl.ProcessFile(cmd.Context(), injectOptions)
 			exitCode := internal.Command(i).MustRun()
 
 			s.Stop()
@@ -115,8 +110,8 @@ func InjectCmd(masterConfig string) *cobra.Command {
 	injectCmd.Flags().StringVarP(&internal.InjectOptions.LicIgnore, "licignore", "l", ".licignore",
 		".licignore path")
 	injectCmd.Flags().StringVarP(&internal.InjectOptions.Copyright, "copyright", "c",
-		fmt.Sprintf("%d %s", internal.Year, internal.Company), "Copyright holder and year for the license header")
-	injectCmd.Flags().StringVarP(&internal.InjectOptions.ConfigPath, "config-path", "p", ".golic.yaml",
+		fmt.Sprintf("%d %s", internal.Year, "[Insert Company]"), "Copyright holder and year for the license header")
+	injectCmd.Flags().StringVarP(&internal.InjectOptions.ConfigPath, "config-path", "p", "",
 		"Path to the local configuration overriding config-url")
 	injectCmd.Flags().StringVarP(&internal.InjectOptions.SearchPath, "include-only", "i", "",
 		"Used to execute only in reading into the path/directory provided")

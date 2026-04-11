@@ -23,7 +23,6 @@ type Options struct {
 }
 
 var Year = time.Now().Year()
-var Company = "MyCompany"
 
 var InjectOptions Options
 var RemoveOptions Options

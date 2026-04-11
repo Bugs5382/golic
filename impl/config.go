@@ -1,4 +1,4 @@
-package internal
+package impl
 
 type Config struct {
 	Golic struct {
@@ -9,11 +9,6 @@ type Config struct {
 			Under  []string `yaml:"under"`
 		} `yaml:"rules"`
 	} `yaml:"golic"`
-}
-
-func InitConfig() Config {
-	cfg := Config{}
-	return cfg
 }
 
 func (c *Config) IsWrapped(key string) bool {
