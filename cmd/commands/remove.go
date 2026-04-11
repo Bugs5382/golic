@@ -8,7 +8,7 @@ import (
 	"github.com/AbsaOSS/golic/impl"
 	"github.com/AbsaOSS/golic/internal"
 	"github.com/briandowns/spinner"
-	log "github.com/sirupsen/logrus"
+	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 )
 
@@ -24,12 +24,14 @@ func RemoveCmd(masterConfig string) *cobra.Command {
 		Long:  ``,
 		RunE: func(cmd *cobra.Command, args []string) error {
 
+			levelStr := os.Getenv("LOG_LEVEL")
 			verbose, _ := cmd.Flags().GetBool("verbose")
-
-			if verbose {
-				log.SetLevel(log.DebugLevel)
-			} else {
-				log.SetLevel(log.InfoLevel)
+			if levelStr == "" {
+				if verbose {
+					zerolog.SetGlobalLevel(zerolog.DebugLevel)
+				} else {
+					zerolog.SetGlobalLevel(zerolog.InfoLevel)
+				}
 			}
 
 			// golic config

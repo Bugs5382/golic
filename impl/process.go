@@ -8,7 +8,7 @@ import (
 	"github.com/denormal/go-gitignore"
 	"github.com/enescakir/emoji"
 	"github.com/logrusorgru/aurora"
-	log "github.com/sirupsen/logrus"
+	"github.com/rs/zerolog/log"
 )
 
 type Process struct {
@@ -31,10 +31,10 @@ func ProcessFile(ctx context.Context, options internal.Options) *Process {
 
 func (u *Process) Run() (err error) {
 	// debug commands
-	log.Debugf("%s reading config path: %s", emoji.OpenBook, u.Opts.ConfigPath)
-	log.Debugf("%s reading lic ignore path: %s", emoji.OpenBook, u.Opts.LicIgnore)
-	log.Debugf("%s reading template: %s", emoji.OpenBook, u.Opts.Template)
-	log.Debugf("%s reading search path: %s", emoji.OpenBook, u.Opts.SearchPath)
+	log.Debug().Msgf("%s reading config path: %s", emoji.OpenBook, u.Opts.ConfigPath)
+	log.Debug().Msgf("%s reading lic ignore path: %s", emoji.OpenBook, u.Opts.LicIgnore)
+	log.Debug().Msgf("%s reading template: %s", emoji.OpenBook, u.Opts.Template)
+	log.Debug().Msgf("%s reading search path: %s", emoji.OpenBook, u.Opts.SearchPath)
 
 	if u.cfg, err = u.readCommonConfig(); err != nil {
 		return
@@ -46,8 +46,8 @@ func (u *Process) Run() (err error) {
 	}
 
 	if _, err = os.Stat(u.Opts.ConfigPath); !os.IsNotExist(err) {
-		log.Debugf("%s reading %s", emoji.OpenBook, aurora.BrightCyan(u.Opts.ConfigPath))
-		log.Debugf("%s overriding %s with %s",
+		log.Debug().Msgf("%s reading %s", emoji.OpenBook, aurora.BrightCyan(u.Opts.ConfigPath))
+		log.Debug().Msgf("%s overriding %s with %s",
 			emoji.ConstructionWorker, aurora.BrightCyan("master config"),
 			aurora.BrightCyan(u.Opts.ConfigPath))
 		if u.cfg, err = u.readLocalConfig(); err != nil {
@@ -55,9 +55,9 @@ func (u *Process) Run() (err error) {
 		}
 	} else {
 		if u.Opts.ConfigPath == "" {
-			log.Debugf("%s no local found; using embeded.", emoji.FileFolder)
+			log.Debug().Msgf("%s no local found; using embeded.", emoji.FileFolder)
 		} else {
-			log.Debugf("%s skipping local %s", emoji.FileFolder, aurora.BrightCyan(u.Opts.ConfigPath))
+			log.Debug().Msgf("%s skipping local %s", emoji.FileFolder, aurora.BrightCyan(u.Opts.ConfigPath))
 		}
 	}
 

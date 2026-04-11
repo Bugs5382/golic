@@ -3,8 +3,11 @@ package logging
 import (
 	"os"
 	"strconv"
+	"strings"
+	"time"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 // Init sets up logging configuration
@@ -14,29 +17,39 @@ func Init() {
 }
 
 func setLogFormat() {
-	format := os.Getenv("LOG_FORMAT")
+	format := strings.ToLower(os.Getenv("LOG_FORMAT"))
+
 	if format == "json" {
-		log.SetFormatter(&log.JSONFormatter{})
-	} else {
-		log.SetFormatter(&log.TextFormatter{})
+		return
 	}
+
+	// Otherwise, default to ConsoleWriter (Text)
+	log.Logger = log.Output(zerolog.ConsoleWriter{
+		Out:        os.Stderr,
+		TimeFormat: time.RFC3339,
+	})
 }
 
 func setLogLevel() {
-	level := os.Getenv("LOG_LEVEL")
-	if level == "" {
-		log.SetLevel(log.InfoLevel)
-	} else {
-		if levelInt, err := strconv.Atoi(level); err == nil {
-			log.SetLevel(log.Level(uint32(levelInt)))
-		} else {
-			levelInt, err := log.ParseLevel(level)
-			if err != nil {
-				log.SetLevel(log.InfoLevel)
-				log.Errorf("Invalid log level '%s', defaulting to info", level)
-			} else {
-				log.SetLevel(levelInt)
-			}
-		}
+	levelStr := os.Getenv("LOG_LEVEL")
+
+	if levelStr == "" {
+		zerolog.SetGlobalLevel(zerolog.InfoLevel)
+		return
 	}
+
+	parsedLevel, err := zerolog.ParseLevel(levelStr)
+	if err == nil {
+		zerolog.SetGlobalLevel(parsedLevel)
+		return
+	}
+
+	// 3. Fallback: Try parsing as an integer (e.g., "0" for debug, "1" for info)
+	if levelInt, err := strconv.Atoi(levelStr); err == nil {
+		zerolog.SetGlobalLevel(zerolog.Level(levelInt))
+		return
+	}
+
+	zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	log.Debug().Msgf("Invalid log level '%s', defaulting to info", levelStr)
 }

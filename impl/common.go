@@ -12,7 +12,7 @@ import (
 	"github.com/enescakir/emoji"
 	"github.com/goccy/go-yaml"
 	"github.com/logrusorgru/aurora"
-	log "github.com/sirupsen/logrus"
+	"github.com/rs/zerolog/log"
 )
 
 func injectFile(path string, o internal.Options, config *Config) (err error, skip bool) {

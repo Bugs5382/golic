@@ -2,7 +2,7 @@ package internal
 
 import (
 	"github.com/enescakir/emoji"
-	log "github.com/sirupsen/logrus"
+	"github.com/rs/zerolog/log"
 )
 
 type Service interface {
@@ -24,7 +24,7 @@ func Command(service Service) *ServiceRunner {
 
 // MustRun Run service once and panics if service is broken
 func (r *ServiceRunner) MustRun() int {
-	log.Infof("%s command %s started", emoji.Tractor, r.service)
+	log.Info().Msgf("%s command %s started", emoji.Tractor, r.service)
 	_ = r.service.Run()
 	return r.service.ExitCode()
 }

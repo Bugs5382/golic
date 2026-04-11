@@ -8,7 +8,7 @@ require (
 	github.com/enescakir/emoji v1.0.0
 	github.com/goccy/go-yaml v1.19.2
 	github.com/logrusorgru/aurora v2.0.3+incompatible
-	github.com/sirupsen/logrus v1.9.4
+	github.com/rs/zerolog v1.35.0
 	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.11.1
 )
