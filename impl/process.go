@@ -54,8 +54,11 @@ func (u *Process) Run() (err error) {
 			return
 		}
 	} else {
-		log.Debugf("%s skipping local %s", emoji.FileFolder, aurora.BrightCyan(u.Opts.ConfigPath))
-		return nil
+		if u.Opts.ConfigPath == "" {
+			log.Debugf("%s no local found; using embeded.", emoji.FileFolder)
+		} else {
+			log.Debugf("%s skipping local %s", emoji.FileFolder, aurora.BrightCyan(u.Opts.ConfigPath))
+		}
 	}
 
 	u.traverseFiles()
