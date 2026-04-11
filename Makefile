@@ -17,7 +17,8 @@ SHELL := bash
 ARTIFACT_NAME := golic
 TESTPARALLELISM := 4
 WORKING_DIR := $(shell pwd)
-GOLIC_VERSION  ?= v0.7.2
+VERSION ?= local-build
+PACKAGE = github.com/AbsaOSS/golic/internal/buildinfo
 
 ifndef NO_COLOR
 YELLOW=\033[0;33m
@@ -34,7 +35,7 @@ clean::
 .PHONY: build
 build:
 	@mkdir -p bin
-	go build -o bin/golic main.go
+	go build -ldflags="-X '$(PACKAGE).Version=$(VERSION)'" -o bin/golic main.go
 
 .PHONY: test
 test::
