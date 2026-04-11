@@ -92,35 +92,36 @@ func (u *Process) readCommonConfig() (c *Config, err error) {
 func (u *Process) readLocalConfig() (*Config, error) {
 	var rc = *u.cfg
 
+	if rc.Golic.Licenses == nil {
+		rc.Golic.Licenses = make(map[string]string)
+	}
+	if rc.Golic.Rules == nil {
+		rc.Golic.Rules = make(map[string]Rule)
+	}
+
 	yamlFile, err := os.ReadFile(u.Opts.ConfigPath)
 	if err != nil {
 		return &rc, nil
 	}
 
 	var c = &Config{}
+	c.Golic.MergeRules = true // Default value is true
+
 	err = yaml.Unmarshal(yamlFile, c)
 	if err != nil {
 		return &rc, nil
 	}
 
-	if len(c.Golic.Licenses) > 0 {
-		if rc.Golic.Licenses == nil {
-			rc.Golic.Licenses = c.Golic.Licenses
-		} else {
-			for k, v := range c.Golic.Licenses {
-				rc.Golic.Licenses[k] = v
-			}
-		}
+	for k, v := range c.Golic.Licenses {
+		rc.Golic.Licenses[k] = v
 	}
 
-	if len(c.Golic.Rules) > 0 {
-		if rc.Golic.Rules == nil {
-			rc.Golic.Rules = c.Golic.Rules
-		} else {
-			for k, v := range c.Golic.Rules {
-				rc.Golic.Rules[k] = v
-			}
+	if c.Golic.MergeRules {
+		for k, v := range c.Golic.Rules {
+			rc.Golic.Rules[k] = v
 		}
+	} else if len(c.Golic.Rules) > 0 {
+		rc.Golic.Rules = c.Golic.Rules
 	}
 
 	return &rc, nil
@@ -132,20 +133,29 @@ func (u *Process) traverseFiles() {
 	visited := 0
 	p := func(path string, i gitignore.GitIgnore, o internal.Options, config *Config) (err error) {
 		if !i.Ignore(path) {
+			ruleName := getRule(config, path)
+			if ruleName == "" {
+				return nil
+			}
+
 			var rule string
 			var skip bool
 			symbol := ""
 			prefix := ""
 			cp := aurora.BrightYellow(path)
+
 			visited++
+
 			if err, rule, skip = processUpdate(path, o, config); skip {
 				symbol = "-> skip"
 				cp = aurora.Magenta(path)
 				skipped++
 			}
+
 			if u.Opts.Dry {
 				prefix = aurora.Bold(aurora.Yellow(fmt.Sprintf("%s DRY RUN: ", emoji.TestTube))).String()
 			}
+
 			if log.Debug().Enabled() {
 				_, _ = emoji.Printf("%s %s  %s %s %s\n",
 					prefix,
@@ -163,7 +173,7 @@ func (u *Process) traverseFiles() {
 				)
 			}
 		}
-		return
+		return nil
 	}
 
 	err := filepath.Walk("./",
@@ -296,23 +306,20 @@ func getRule(config *Config, path string) (rule string) {
 	}
 
 	sort.Slice(keys, func(i, j int) bool {
-		if len(keys[i]) != len(keys[j]) {
-			return len(keys[i]) > len(keys[j])
-		}
-		return keys[i] < keys[j]
+		return len(keys[i]) > len(keys[j])
 	})
 
 	cleanPath := filepath.ToSlash(path)
-
 	for _, k := range keys {
 		if pkg.IsMatch(cleanPath, k) {
 			return k
 		}
 	}
 
-	rule = filepath.Ext(path)
-	if rule == "" {
-		rule = filepath.Base(path)
+	ext := filepath.Ext(path)
+	if _, ok := config.Golic.Rules[ext]; ok {
+		return ext
 	}
-	return
+
+	return ""
 }

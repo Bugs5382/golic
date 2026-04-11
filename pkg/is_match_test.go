@@ -28,17 +28,21 @@ import (
 )
 
 func TestMatchRule(t *testing.T) {
-	config := &impl.Config{}
-	// ... (Your config setup stays the same) ...
-	config.Golic.Rules = map[string]struct {
-		Prefix string   `yaml:"prefix"`
-		Suffix string   `yaml:"suffix"`
-		Under  []string `yaml:"under"`
-	}{
-		"Makefile":               {Prefix: "#"},
-		"**/templates/**/*.yaml": {Prefix: "{{/*", Suffix: "*/}}"},
-		"*.go":                   {Prefix: "/*", Suffix: "*/"},
-		"cmd/server/main.go":     {Prefix: "//"},
+	config := &impl.Config{
+		Golic: struct {
+			Licenses   map[string]string    `yaml:"licenses"`
+			Rules      map[string]impl.Rule `yaml:"rules"`
+			MergeRules bool                 `yaml:"mergeRules"`
+		}{
+			Licenses: make(map[string]string),
+			Rules: map[string]impl.Rule{
+				"Makefile":               {Prefix: "#"},
+				"**/templates/**/*.yaml": {Prefix: "{{/*", Suffix: "*/}}"},
+				"*.go":                   {Prefix: "/*", Suffix: "*/"},
+				"cmd/server/main.go":     {Prefix: "//"},
+			},
+			MergeRules: false,
+		},
 	}
 
 	tests := []struct {
