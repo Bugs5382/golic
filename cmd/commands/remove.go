@@ -105,13 +105,18 @@ func RemoveCmd(masterConfig string) *cobra.Command {
 	}
 
 	// flags
-	removeCmd.Flags().BoolVarP(&internal.RemoveOptions.Dry, "dry", "d", false, "dry run")
-	removeCmd.Flags().StringVarP(&internal.RemoveOptions.LicIgnore, "licignore", "l", ".licignore", ".licignore path")
-	removeCmd.Flags().StringVarP(&internal.RemoveOptions.Template, "template", "t", "", "license key")
-	removeCmd.Flags().StringVarP(&internal.RemoveOptions.Copyright, "copyright", "c",
-		fmt.Sprintf("%d %s", internal.Year, internal.Company), "copyright holder and year for the license header",
-	)
-	removeCmd.Flags().StringVarP(&internal.RemoveOptions.ConfigPath, "config-path", "p", ".golic.yaml", "path to the local configuration overriding config-url")
+	removeCmd.Flags().BoolVarP(&internal.RemoveOptions.ModifiedExitStatus, "modified-exit", "x", false,
+		"If enabled, exits with status 1 when any file is modified. The settings is used by CI")
+	removeCmd.Flags().BoolVarP(&internal.RemoveOptions.Dry, "dry", "d", false, "Dry run")
 
+	removeCmd.Flags().StringVarP(&internal.RemoveOptions.Template, "template", "t", "", "License key")
+	removeCmd.Flags().StringVarP(&internal.RemoveOptions.LicIgnore, "licignore", "l", ".licignore",
+		".licignore path")
+	removeCmd.Flags().StringVarP(&internal.RemoveOptions.Copyright, "copyright", "c",
+		fmt.Sprintf("%d %s", internal.Year, internal.Company), "Copyright holder and year for the license header")
+	removeCmd.Flags().StringVarP(&internal.RemoveOptions.ConfigPath, "config-path", "p", ".golic.yaml",
+		"Path to the local configuration overriding config-url")
+	removeCmd.Flags().StringVarP(&internal.RemoveOptions.SearchPath, "include-only", "i", "",
+		"Used to execute only in reading into the path/directory provided")
 	return removeCmd
 }
