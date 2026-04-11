@@ -15,19 +15,19 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func injectFile(path string, o internal.Options, config *Config) (err error, skip bool) {
+func injectFile(path string, o internal.Options, config *Config) (err error, rule string, skip bool) {
 	source, err := read(path)
 	if err != nil {
-		return err, false
+		return err, "", false
 	}
-	rule := getRule(config, path)
+	rule = getRule(config, path)
 	license, err := getCommentedLicense(config, o, rule)
 	if err != nil {
-		return err, false
+		return err, rule, false
 	}
 	// license is injected, continue
 	if strings.Contains(source, license) {
-		return nil, true
+		return nil, rule, true
 	}
 	// split file to header and footer and extend with license
 	header, footer := splitSource(source, config.Golic.Rules[rule].Under)
@@ -44,20 +44,20 @@ func injectFile(path string, o internal.Options, config *Config) (err error, ski
 }
 
 // removeFile Remove text from file overall function
-func removeFile(path string, o internal.Options, config *Config) (err error, skip bool) {
+func removeFile(path string, o internal.Options, config *Config) (err error, rule string, skip bool) {
 	source, err := read(path)
 	if err != nil {
-		return err, false
+		return err, "", false
 	}
-	rule := getRule(config, path)
+	rule = getRule(config, path)
 	license, err := getCommentedLicense(config, o, rule)
 	if err != nil {
-		return err, false
+		return err, rule, false
 	}
 	if strings.Contains(source, license) {
-		return RemoveFromFile(path, o, source, license, err), false
+		return RemoveFromFile(path, o, source, license, err), "", false
 	}
-	return nil, true
+	return nil, rule, true
 }
 
 // readCommonConfig Read the commong/master config
@@ -94,16 +94,36 @@ func (u *Process) traverseFiles() {
 	visited := 0
 	p := func(path string, i gitignore.GitIgnore, o internal.Options, config *Config) (err error) {
 		if !i.Ignore(path) {
+			var rule string
 			var skip bool
 			symbol := ""
+			prefix := ""
 			cp := aurora.BrightYellow(path)
 			visited++
-			if err, skip = processUpdate(path, o, config); skip {
+			if err, rule, skip = processUpdate(path, o, config); skip {
 				symbol = "-> skip"
 				cp = aurora.Magenta(path)
 				skipped++
 			}
-			_, _ = emoji.Printf(" %s  %s %s  \n", emoji.Minus, cp, aurora.BrightMagenta(symbol))
+			if u.Opts.Dry {
+				prefix = aurora.Bold(aurora.Yellow(fmt.Sprintf("%s DRY RUN: ", emoji.TestTube))).String()
+			}
+			if log.Debug().Enabled() {
+				_, _ = emoji.Printf("%s %s  %s %s %s\n",
+					prefix,
+					emoji.Minus,
+					cp,
+					aurora.Bold(aurora.BrightMagenta(symbol)),
+					aurora.Gray(12, fmt.Sprintf("[%s]", rule)),
+				)
+			} else {
+				_, _ = emoji.Printf("%s %s  %s %s\n",
+					prefix,
+					emoji.Minus,
+					cp,
+					aurora.Bold(aurora.BrightMagenta(symbol)),
+				)
+			}
 		}
 		return
 	}
@@ -128,14 +148,14 @@ func (u *Process) traverseFiles() {
 }
 
 // processUpdate Update the file, but how?
-func processUpdate(path string, o internal.Options, config *Config) (err error, skip bool) {
+func processUpdate(path string, o internal.Options, config *Config) (err error, rule string, skip bool) {
 	switch o.Type {
 	case internal.LicenseInject:
 		return injectFile(path, o, config)
 	case internal.LicenseRemove:
 		return removeFile(path, o, config)
 	}
-	return fmt.Errorf("invalid license type"), true
+	return fmt.Errorf("invalid license type"), "", true
 }
 
 func displaySummary(skipped, visited int) {
