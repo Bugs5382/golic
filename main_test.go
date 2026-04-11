@@ -8,10 +8,10 @@ import (
 )
 
 func TestRootCmdErrorMessage(t *testing.T) {
-	cmd, b := commands.SetupTest()
+	cmd, _ := commands.SetupTest()
 
 	cmd.SetArgs([]string{})
-	_ = cmd.Execute()
+	err := cmd.Execute()
 
-	assert.Contains(t, b.String(), "Error: no parameters included")
+	assert.ErrorContains(t, err, "no arguments passed")
 }
