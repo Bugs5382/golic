@@ -3,12 +3,12 @@ package pkg_test
 import (
 	"testing"
 
-	"github.com/AbsaOSS/golic/internal"
+	"github.com/AbsaOSS/golic/impl"
 	"github.com/AbsaOSS/golic/pkg"
 )
 
 func TestMatchRule(t *testing.T) {
-	config := &internal.Config{}
+	config := &impl.Config{}
 	// ... (Your config setup stays the same) ...
 	config.Golic.Rules = map[string]struct {
 		Prefix string   `yaml:"prefix"`
