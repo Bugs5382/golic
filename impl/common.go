@@ -146,7 +146,9 @@ func (u *Process) traverseFiles() {
 
 			visited++
 
-			if err, rule, skip = processUpdate(path, o, config); skip {
+			if err, rule, skip = processUpdate(path, o, config); err != nil {
+				return err
+			} else if skip {
 				symbol = "-> skip"
 				cp = aurora.Magenta(path)
 				skipped++

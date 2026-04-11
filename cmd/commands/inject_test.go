@@ -45,7 +45,7 @@ func TestInject(t *testing.T) {
 
 	t.Run("inject with mit", func(t *testing.T) {
 		out.Reset()
-		root.SetArgs([]string{"inject", "-p", "../../.golic.yaml", "-l", "../../.licignore", "-t", "mit"})
+		root.SetArgs([]string{"inject", "-p", "../../.golic.yaml", "-l", "../../.licignore", "-t", "mit", "-d"})
 		_ = root.Execute()
 	})
 
