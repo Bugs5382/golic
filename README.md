@@ -1,5 +1,3 @@
-This is a solid README for **Golic**. I’ve polished the formatting, added intuitive icons, improved the hierarchy for better scannability, and clarified the core workflow.
-
 # 🚀 Golic
 
 > **A declarative tool for injecting and managing license headers in source code.**
