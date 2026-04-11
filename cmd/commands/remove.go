@@ -53,14 +53,13 @@ func RemoveCmd(masterConfig string) *cobra.Command {
 			}
 
 			// golic config
-			configPath := internal.RemoveOptions.ConfigPath
+			configPath := internal.InjectOptions.ConfigPath
 			if configPath != "" {
-				_, err := os.ReadFile(configPath)
-				if err != nil {
-					return fmt.Errorf("config file not found: ensure '.golic.yaml' exists in the current" +
-						" directory or provide a valid path")
+				if _, err := os.Stat(configPath); os.IsNotExist(err) {
+					return fmt.Errorf("config file not found: ensure '.golic.yaml' exists or check path: %s", configPath)
+				} else if err != nil {
+					return fmt.Errorf("error accessing config file: %w", err)
 				}
-				return fmt.Errorf("error accessing config file: %w", err)
 			}
 
 			// Ensure the resolved path is saved back to your options so downstream code uses it
