@@ -25,7 +25,9 @@ on:
 
 permissions:
   contents: write
-  pull-requests: read
+  pull-requests: write
+  packages: write
+  id-token: write
 
 jobs:
   Update_On_Main:
@@ -61,6 +63,19 @@ jobs:
   Build_and_Release:
     if: github.event_name == 'release'
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - goos: linux
+            goarch: amd64
+          - goos: linux
+            goarch: arm64
+          - goos: darwin
+            goarch: amd64
+          - goos: darwin
+            goarch: arm64
+          - goos: windows
+            goarch: amd64
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -72,7 +87,7 @@ jobs:
 
       - name: Build Binary
         run: |
-          make build
+          make build GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }}
 
       - name: Upload Binary to Release
         uses: softprops/action-gh-release@v2
