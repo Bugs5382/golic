@@ -25,7 +25,9 @@ on:
 
 permissions:
   contents: write
-  pull-requests: read
+  pull-requests: write
+  packages: write
+  id-token: write
 
 jobs:
   Update_On_Main:
