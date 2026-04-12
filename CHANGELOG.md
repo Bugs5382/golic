@@ -10,6 +10,7 @@
 
 #### 🐛 Bug Fixes
 
+- fix: job release and bump @Bugs5382 (#8, #9, #10)
 - fix: commit to git @Bugs5382 (#6)
 - feat: added release-drafter template @Bugs5382 (#4)
 
