@@ -39,7 +39,7 @@ clean::
 build:
 	@mkdir -p bin
 	GOOS=$(GOOS) GOARCH=$(GOARCH) go build \
-		-ldflags "-X main.Version=$(VERSION)" \
+		-ldflags "-X $(PACKAGE)=$(VERSION)" \
 		-o bin/$(ARTIFACT_NAME)-$(GOOS)-$(GOARCH)
 
 .PHONY: test
