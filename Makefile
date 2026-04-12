@@ -66,6 +66,9 @@ lint: test license
 
 
 .PHONY: license
-license:
-	@echo -e "\n$(YELLOW)Injecting the license$(NC)"
+license: build
 	./bin/golic-$(GOOS)-$(GOARCH) inject -c "2006 Shane" -t apache2
+
+.PHONY: license-dry
+license-dry: build
+	./bin/golic-$(GOOS)-$(GOARCH) inject -c "2006 Shane" -t apache2 -d

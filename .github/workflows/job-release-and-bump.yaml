@@ -53,18 +53,10 @@ jobs:
           latest-version: ${{ steps.drafter.outputs.tag_name }}
           release-notes: ${{ steps.drafter.outputs.body }}
 
-      - name: Commit and Push Version Bump
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          # Only commit if the version actually changed to avoid infinite loops
-          if git diff --exit-code Makefile; then
-            echo "No version change detected."
-          else
-            git add Makefile
-            git commit -m "chore: bump version to ${{ steps.drafter.outputs.resolved_version }} [skip ci]"
-            git push
-          fi
+      - name: Commit and Push Version Update
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "chore(release): ${{ github.event.release.tag_name }} [skip ci]"
 
   Build_and_Release:
     if: github.event_name == 'release'

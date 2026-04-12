@@ -32,4 +32,4 @@ jobs:
       - name: GoLic
         run: |
           go build -o ./bin/golic main.go
-          ./bin/golic inject --dry -c "2022 Absa Group Limited" -t apache2
+          ./bin/golic inject --dry -c "2026 Shane" -t apache2
