@@ -54,11 +54,13 @@ jobs:
         with:
           latest-version: ${{ steps.drafter.outputs.tag_name }}
           release-notes: ${{ steps.drafter.outputs.body }}
+          release-date: ${{ steps.drafter.outputs.publish_date }}
 
       - name: Commit and Push Version Update
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: "chore(release): ${{ github.event.release.tag_name }} [skip ci]"
+          file_pattern: CHANGELOG.md
 
   Build_and_Release:
     if: github.event_name == 'release'
