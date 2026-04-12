@@ -40,6 +40,9 @@ func RootCmd(masterConfig string) *cobra.Command {
 		},
 	}
 
+	// disable
+	rootCmd.CompletionOptions.DisableDefaultCmd = true
+
 	// flags
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "verbose output (e.g. tracing)")
 
