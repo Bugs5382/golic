@@ -46,6 +46,12 @@ jobs:
           echo "Anticipated next version: $NEXT_VER"
           sed -i "s/^VERSION[[:space:]]*?=.*/VERSION ?= $NEXT_VER/" Makefile
 
+      - name: Update Changelog File
+        uses: stefanzweifel/changelog-updater-action@v1.9.1
+        with:
+          latest-version: ${{ steps.drafter.outputs.tag_name }}
+          release-notes: ${{ steps.drafter.outputs.body }}
+
       - name: Commit and Push Version Bump
         run: |
           git config --global user.name "github-actions[bot]"
