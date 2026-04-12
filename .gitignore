@@ -22,6 +22,7 @@ temp
 !CODEOWNERS
 !README.md
 !LICENSE
+!release-drafter.yml
 !renovate.json
 
 # ...even if they are in subdirectories
