@@ -95,6 +95,48 @@ To fail a build if licenses are missing (e.g., a developer forgot to run Golic),
 golic inject --dry -x -t apache2
 ```
 
+## 🏗 Development
+
+### 🛠 Build
+
+To compile the project locally, execute:
+
+```bash
+make build
+```
+
+To remove build artifacts and clean your workspace:
+
+```bash
+make clean
+```
+
+If you are **contributing** to this project, you must first initialize the linting environment:
+ ```bash
+ make lint-init
+ ```
+This command installs all necessary dependencies and tools for code analysis.
+
+Once initialized, you can analyze the codebase by running:
+
+```bash
+make lint
+```
+
+To verify only the project licenses, use:
+
+```bash
+make license
+```
+
+### 🧪 Test
+
+To execute the unit testing suite, run:
+
+```bash
+make test
+```
+
 ## 📋 Command Reference
 
 | Command | Description |

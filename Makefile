@@ -20,6 +20,8 @@ TESTPARALLELISM := 4
 WORKING_DIR := $(shell pwd)
 VERSION ?= local-build
 PACKAGE = github.com/Bugs5382/golic/internal/buildinfo
+GOOS ?= $(shell go env GOOS)
+GOARCH ?= $(shell go env GOARCH)
 
 ifndef NO_COLOR
 YELLOW=\033[0;33m
@@ -36,7 +38,9 @@ clean::
 .PHONY: build
 build:
 	@mkdir -p bin
-	go build -ldflags="-X '$(PACKAGE).Version=$(VERSION)'" -o bin/golic main.go
+	GOOS=$(GOOS) GOARCH=$(GOARCH) go build \
+		-ldflags "-X main.Version=$(VERSION)" \
+		-o bin/$(ARTIFACT_NAME)-$(GOOS)-$(GOARCH)
 
 .PHONY: test
 test::
@@ -63,6 +67,5 @@ lint: test license
 
 .PHONY: license
 license:
-	./bin/golic remove -c "2022 Absa Group Limited" -t apache2
 	@echo -e "\n$(YELLOW)Injecting the license$(NC)"
-	./bin/golic inject -c "2006 Shane" -t apache2
+	./bin/golic-$(GOOS)-$(GOARCH) inject -c "2006 Shane" -t apache2
