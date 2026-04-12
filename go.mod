@@ -1,4 +1,4 @@
-module github.com/AbsaOSS/golic
+module github.com/Bugs5382/golic
 
 go 1.26.1
 
