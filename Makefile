@@ -18,10 +18,12 @@ SHELL := bash
 ARTIFACT_NAME := golic
 TESTPARALLELISM := 4
 WORKING_DIR := $(shell pwd)
+
 VERSION ?= v0.1.0
-PACKAGE = github.com/Bugs5382/golic/internal/buildinfo
-GOOS ?= $(shell go env GOOS)
-GOARCH ?= $(shell go env GOARCH)
+MODULE   := $(shell go list -m)
+GOOS     ?= $(shell go env GOOS)
+GOARCH   ?= $(shell go env GOARCH)
+LD_FLAGS := -X $(MODULE)/internal/buildinfo.Version=$(VERSION)
 
 ifndef NO_COLOR
 YELLOW=\033[0;33m
@@ -39,7 +41,7 @@ clean::
 build:
 	@mkdir -p bin
 	GOOS=$(GOOS) GOARCH=$(GOARCH) go build \
-		-ldflags "-X $(PACKAGE)=$(VERSION)" \
+		-ldflags "$(LD_FLAGS)" \
 		-o bin/$(ARTIFACT_NAME)-$(GOOS)-$(GOARCH)
 
 .PHONY: test
