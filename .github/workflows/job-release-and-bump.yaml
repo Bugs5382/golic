@@ -47,7 +47,7 @@ jobs:
         run: |
           NEXT_VER="${{ steps.drafter.outputs.resolved_version }}"
           echo "Anticipated next version: $NEXT_VER"
-          sed -i "s/^VERSION[[:space:]]*?=.*/VERSION ?= $NEXT_VER/" Makefile
+          sed -i "s/^VERSION[[:space:]]*?=.*/VERSION ?= v$NEXT_VER/" Makefile
 
       - name: Update Changelog File
         uses: stefanzweifel/changelog-updater-action@v1.9.1
