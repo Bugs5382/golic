@@ -23,8 +23,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/AbsaOSS/golic/cmd/commands"
-	"github.com/AbsaOSS/golic/cmd/logging"
+	"github.com/Bugs5382/golic/cmd/commands"
+	"github.com/Bugs5382/golic/cmd/logging"
 	"github.com/enescakir/emoji"
 )
 

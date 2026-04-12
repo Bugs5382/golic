@@ -25,8 +25,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/AbsaOSS/golic/internal"
-	"github.com/AbsaOSS/golic/pkg"
+	"github.com/Bugs5382/golic/internal"
+	"github.com/Bugs5382/golic/pkg"
 	"github.com/denormal/go-gitignore"
 	"github.com/enescakir/emoji"
 	"github.com/goccy/go-yaml"

@@ -19,7 +19,7 @@ limitations under the License.
 */
 
 import (
-	"github.com/AbsaOSS/golic/internal/buildinfo"
+	"github.com/Bugs5382/golic/internal/buildinfo"
 	"github.com/spf13/cobra"
 )
 

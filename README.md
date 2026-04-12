@@ -45,7 +45,7 @@ Determines which files Golic should touch. It uses standard `.gitignore` syntax.
 
 ### 2\. `.golic.yaml`
 
-Contains license text and formatting rules. Golic merges your local file with its [embedded master configuration](https://raw.githubusercontent.com/Bugs5382/golic/.golic.yaml) by default.
+Contains license text and formatting rules. Golic merges your local file with its [embedded master configuration](.golic.yaml) by default.
 
 ```yaml
 # .golic.yaml 
@@ -147,14 +147,14 @@ make test
 
 **Common Flags:**
 
-* `-c, --copyright` : Set the holder/year (Default: `2026 [Insert Company]`).
+* `-c, --copyright` : Set the holder/year (Default: `YYYY [Insert Company]`). YYYY defaults to the current year.
 * `-d, --dry` : Run without writing to files.
 * `-t, --template` : Specify which license key to use from the config.
 * `-v, --verbose` : Enable detailed trace logging.
 
 ## 🤝 Contributing
 
-We welcome Pull Requests\! Please follow these steps:
+We welcome Pull Requests! Please follow these steps:
 
 * **✅ Validation:** Run `make lint` to verify code quality.
 * **🧪 Testing:** New features must include unit tests.

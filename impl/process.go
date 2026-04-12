@@ -22,7 +22,7 @@ import (
 	"context"
 	"os"
 
-	"github.com/AbsaOSS/golic/internal"
+	"github.com/Bugs5382/golic/internal"
 	"github.com/denormal/go-gitignore"
 	"github.com/enescakir/emoji"
 	"github.com/goccy/go-yaml"

@@ -22,8 +22,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/AbsaOSS/golic/impl"
-	"github.com/AbsaOSS/golic/internal"
+	"github.com/Bugs5382/golic/impl"
+	"github.com/Bugs5382/golic/internal"
 	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 )
@@ -126,8 +126,8 @@ func InjectCmd(masterConfig string) *cobra.Command {
 		fmt.Sprintf("%d %s", internal.Year, "[Insert Company]"), "Copyright holder and year for the license header")
 	injectCmd.Flags().StringVarP(&internal.InjectOptions.ConfigPath, "config-path", "p", "",
 		"Path to the local configuration overriding config-url")
-	injectCmd.Flags().StringVarP(&internal.InjectOptions.SearchPath, "include-only", "i", "",
-		"Used to execute only in reading into the path/directory provided")
+	//injectCmd.Flags().StringVarP(&internal.InjectOptions.SearchPath, "include-only", "i", "",
+	//	"Used to execute only in reading into the path/directory provided")
 
 	return injectCmd
 }

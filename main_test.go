@@ -21,7 +21,7 @@ limitations under the License.
 import (
 	"testing"
 
-	"github.com/AbsaOSS/golic/cmd/commands"
+	"github.com/Bugs5382/golic/cmd/commands"
 	"github.com/stretchr/testify/assert"
 )
 

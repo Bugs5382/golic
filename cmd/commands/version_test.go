@@ -21,7 +21,7 @@ limitations under the License.
 import (
 	"testing"
 
-	"github.com/AbsaOSS/golic/internal/buildinfo"
+	"github.com/Bugs5382/golic/internal/buildinfo"
 	"github.com/stretchr/testify/assert"
 )
 
