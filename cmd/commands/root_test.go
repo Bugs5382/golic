@@ -19,9 +19,34 @@ limitations under the License.
 */
 
 import (
+	"bytes"
+	"os"
 	"testing"
+
+	"github.com/Bugs5382/golic"
+	"github.com/rs/zerolog"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestRoot(t *testing.T) {
+	_ = os.Chdir(golic.GetProjectRoot())
+
+	zerolog.SetGlobalLevel(zerolog.Disabled)
+
+	t.Parallel()
+
+	t.Run("root no args passed", func(t *testing.T) {
+		cmd := RootCmd()
+
+		b := new(bytes.Buffer)
+
+		cmd.SetOut(b)
+		cmd.SetErr(b)
+
+		cmd.SetArgs([]string{})
+
+		err := cmd.Execute()
+		assert.ErrorContains(t, err, "no arguments passed")
+	})
 
 }

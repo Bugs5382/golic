@@ -19,9 +19,34 @@ limitations under the License.
 */
 
 import (
+	"bytes"
+	"os"
 	"testing"
+
+	"github.com/Bugs5382/golic"
+	"github.com/Bugs5382/golic/internal/buildinfo"
+	"github.com/rs/zerolog"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestVersion(t *testing.T) {
+	_ = os.Chdir(golic.GetProjectRoot())
 
+	zerolog.SetGlobalLevel(zerolog.Disabled)
+
+	t.Parallel()
+
+	t.Run("get version", func(t *testing.T) {
+		cmd := RootCmd()
+
+		b := new(bytes.Buffer)
+
+		cmd.SetOut(b)
+		cmd.SetErr(b)
+
+		cmd.SetArgs([]string{"version"})
+
+		_ = cmd.Execute()
+		assert.Contains(t, b.String(), buildinfo.Version)
+	})
 }
