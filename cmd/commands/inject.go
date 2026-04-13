@@ -3,7 +3,7 @@ package commands
 /*
 Apache License 2.0
 
-Copyright 2006 Shane
+Copyright 2026 Shane
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -23,9 +23,9 @@ import (
 	"os"
 
 	"github.com/Bugs5382/golic"
+	"github.com/Bugs5382/golic/cmd/logging"
 	"github.com/Bugs5382/golic/impl"
 	"github.com/Bugs5382/golic/internal"
-	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 )
 
@@ -42,15 +42,8 @@ func InjectCmd() *cobra.Command {
 		Long:  ``,
 		RunE: func(cmd *cobra.Command, args []string) error {
 
-			levelStr := os.Getenv("LOG_LEVEL")
 			verbose, _ := cmd.Flags().GetBool("verbose")
-			if levelStr == "" {
-				if verbose {
-					zerolog.SetGlobalLevel(zerolog.DebugLevel)
-				} else {
-					// zerolog.SetGlobalLevel(zerolog.InfoLevel)
-				}
-			}
+			logging.Init(verbose)
 
 			// golic config
 			configPath := opts.ConfigPath

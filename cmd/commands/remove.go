@@ -3,7 +3,7 @@ package commands
 /*
 Apache License 2.0
 
-Copyright 2006 Shane
+Copyright 2026 Shane
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -23,9 +23,9 @@ import (
 	"os"
 
 	"github.com/Bugs5382/golic"
+	"github.com/Bugs5382/golic/cmd/logging"
 	"github.com/Bugs5382/golic/impl"
 	"github.com/Bugs5382/golic/internal"
-	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 )
 
@@ -42,28 +42,14 @@ func RemoveCmd() *cobra.Command {
 		Long:  ``,
 		RunE: func(cmd *cobra.Command, args []string) error {
 
-			levelStr := os.Getenv("LOG_LEVEL")
 			verbose, _ := cmd.Flags().GetBool("verbose")
-			if levelStr == "" {
-				if verbose {
-					zerolog.SetGlobalLevel(zerolog.DebugLevel)
-				} else {
-					zerolog.SetGlobalLevel(zerolog.InfoLevel)
-				}
-			}
+			logging.Init(verbose)
 
 			// golic config
-			defaultConfigPath := ".golic.yaml"
-			configPath := internal.InjectOptions.ConfigPath
+			configPath := opts.ConfigPath
 			if configPath != "" {
 				if _, err := os.Stat(configPath); os.IsNotExist(err) {
-					if defaultConfigPath == configPath {
-						configPath = ""
-					} else {
-						return fmt.Errorf("custom config file not found: check path: %s", configPath)
-					}
-				} else if err != nil {
-					return fmt.Errorf("error accessing config file: %w", err)
+					return fmt.Errorf("custom config file not found: check path: %s", configPath)
 				}
 			}
 
