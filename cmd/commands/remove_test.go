@@ -50,7 +50,7 @@ func TestRemove(t *testing.T) {
 
 		err := cmd.Execute()
 
-		assert.ErrorContains(t, err, "licence template not provided")
+		assert.ErrorContains(t, err, "license template not provided")
 	})
 
 	t.Run("remove -- custom config file not found", func(t *testing.T) {
@@ -70,7 +70,7 @@ func TestRemove(t *testing.T) {
 
 		err := cmd.Execute()
 
-		assert.ErrorContains(t, err, "custom config file not found: check path: .golic-test.yaml")
+		assert.ErrorContains(t, err, "custom config file not found: .golic-test.yaml")
 	})
 
 	t.Run("remove -- custom lic ignore not found", func(t *testing.T) {
@@ -90,7 +90,7 @@ func TestRemove(t *testing.T) {
 
 		err := cmd.Execute()
 
-		assert.ErrorContains(t, err, "custom config file not found: check path: .licignoreNotFound")
+		assert.ErrorContains(t, err, "custom ignore file not found: .licignoreNotFound")
 	})
 
 	t.Run("remove -- template mit (no error)", func(t *testing.T) {

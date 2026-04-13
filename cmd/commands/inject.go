@@ -20,10 +20,8 @@ limitations under the License.
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/Bugs5382/golic"
-	"github.com/Bugs5382/golic/cmd/logging"
 	"github.com/Bugs5382/golic/impl"
 	"github.com/Bugs5382/golic/internal"
 	"github.com/spf13/cobra"
@@ -40,39 +38,10 @@ func InjectCmd() *cobra.Command {
 		Use:   "inject",
 		Short: "Injects licenses",
 		Long:  ``,
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			return setupAndValidate(cmd, &opts)
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-
-			verbose, _ := cmd.Flags().GetBool("verbose")
-			logging.Init(verbose)
-
-			// golic config
-			configPath := opts.ConfigPath
-			if configPath != "" {
-				if _, err := os.Stat(configPath); os.IsNotExist(err) {
-					return fmt.Errorf("custom config file not found: check path: %s", configPath)
-				}
-			}
-
-			// Ensure the resolved path is saved back to your options so downstream code uses it
-			opts.ConfigPath = configPath
-
-			// ignore lic
-			configIgnorePath := opts.LicIgnore
-			if configIgnorePath != "" {
-				if _, err := os.Stat(configIgnorePath); os.IsNotExist(err) {
-					return fmt.Errorf("custom config file not found: check path: %s", configIgnorePath)
-				}
-			}
-
-			// Ensure the resolved path is saved back to your options so downstream code uses it
-			opts.LicIgnore = configIgnorePath
-
-			// template setting
-			templateSelected := opts.Template
-			if templateSelected == "" {
-				return fmt.Errorf("licence template not provided")
-			}
-
 			// we are injecting!
 			opts.Type = 0
 
