@@ -22,16 +22,18 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/Bugs5382/golic"
 	"github.com/Bugs5382/golic/impl"
 	"github.com/Bugs5382/golic/internal"
 	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 )
 
-func RemoveCmd(masterConfig string) *cobra.Command {
+func RemoveCmd() *cobra.Command {
 
-	var removeOptions internal.Options
-	removeOptions.MasterConfig = masterConfig
+	opts := internal.Options{}
+
+	opts.MasterConfig = golic.DefaultConfig
 
 	// command
 	var removeCmd = &cobra.Command{
@@ -51,60 +53,50 @@ func RemoveCmd(masterConfig string) *cobra.Command {
 			}
 
 			// golic config
+			defaultConfigPath := ".golic.yaml"
 			configPath := internal.InjectOptions.ConfigPath
 			if configPath != "" {
 				if _, err := os.Stat(configPath); os.IsNotExist(err) {
-					return fmt.Errorf("config file not found: ensure '.golic.yaml' exists or check path: %s", configPath)
+					if defaultConfigPath == configPath {
+						configPath = ""
+					} else {
+						return fmt.Errorf("custom config file not found: check path: %s", configPath)
+					}
 				} else if err != nil {
 					return fmt.Errorf("error accessing config file: %w", err)
 				}
 			}
 
 			// Ensure the resolved path is saved back to your options so downstream code uses it
-			removeOptions.ConfigPath = configPath
+			opts.ConfigPath = configPath
 
 			// ignore lic
-			ignorePath := internal.RemoveOptions.LicIgnore
-			if ignorePath == "" {
-				ignorePath = ".licignore"
-			}
-
-			// Check if the file actually exists
-			if _, err := os.Stat(ignorePath); err != nil {
-				if os.IsNotExist(err) {
-					return fmt.Errorf("ignore file not found: ensure '.licignore' exists in the current" +
-						" directory or provide a valid path")
+			configIgnorePath := opts.LicIgnore
+			if configIgnorePath != "" {
+				if _, err := os.Stat(configIgnorePath); os.IsNotExist(err) {
+					return fmt.Errorf("custom config file not found: check path: %s", configIgnorePath)
 				}
-				// Catch any other potential file system errors (e.g., permission denied)
-				return fmt.Errorf("error accessing config file: %w", err)
 			}
 
 			// Ensure the resolved path is saved back to your options so downstream code uses it
-			removeOptions.LicIgnore = ignorePath
+			opts.LicIgnore = configIgnorePath
 
-			templateSelected := internal.RemoveOptions.Template
+			// template setting
+			templateSelected := opts.Template
 			if templateSelected == "" {
 				return fmt.Errorf("licence template not provided")
 			}
 
-			// copyright string
-			removeOptions.Copyright = internal.RemoveOptions.Copyright
-			// template setting
-			removeOptions.Template = templateSelected
-			// dry run options
-			removeOptions.Dry = internal.RemoveOptions.Dry
-			// modified status
-			removeOptions.ModifiedExitStatus = internal.RemoveOptions.ModifiedExitStatus
-			// search dir settings
-			removeOptions.SearchPath = internal.RemoveOptions.SearchPath
 			// we are removing!
-			removeOptions.Type = 1
-			// verbose
-			removeOptions.Verbose = verbose
+			opts.Type = 1
 
 			// go ahead and start the inject process!
-			i := impl.ProcessFile(cmd.Context(), removeOptions)
-			exitCode := internal.Command(i).MustRun()
+			i := impl.ProcessFile(cmd.Context(), opts)
+			exitCode, err := internal.Command(i).MustRun()
+
+			if err != nil {
+				return err
+			}
 
 			if exitCode != 0 {
 				return fmt.Errorf("something went wrong")
@@ -115,18 +107,18 @@ func RemoveCmd(masterConfig string) *cobra.Command {
 	}
 
 	// flags
-	removeCmd.Flags().BoolVarP(&internal.RemoveOptions.ModifiedExitStatus, "modified-exit", "x", false,
+	removeCmd.Flags().BoolVarP(&opts.ModifiedExitStatus, "modified-exit", "x", false,
 		"If enabled, exits with status 1 when any file is modified. The settings is used by CI")
-	removeCmd.Flags().BoolVarP(&internal.RemoveOptions.Dry, "dry", "d", false, "Dry run")
+	removeCmd.Flags().BoolVarP(&opts.Dry, "dry", "d", false, "Dry run")
 
-	removeCmd.Flags().StringVarP(&internal.RemoveOptions.Template, "template", "t", "", "License key")
-	removeCmd.Flags().StringVarP(&internal.RemoveOptions.LicIgnore, "licignore", "l", ".licignore",
+	removeCmd.Flags().StringVarP(&opts.Template, "template", "t", "", "License key")
+	removeCmd.Flags().StringVarP(&opts.LicIgnore, "licignore", "l", ".licignore",
 		".licignore path")
-	removeCmd.Flags().StringVarP(&internal.RemoveOptions.Copyright, "copyright", "c",
+	removeCmd.Flags().StringVarP(&opts.Copyright, "copyright", "c",
 		fmt.Sprintf("%d %s", internal.Year, "[Insert Company]"), "Copyright holder and year for the license header")
-	removeCmd.Flags().StringVarP(&internal.RemoveOptions.ConfigPath, "config-path", "p", "",
+	removeCmd.Flags().StringVarP(&opts.ConfigPath, "config-path", "p", ".golic.yaml",
 		"Path to the local configuration overriding config-url")
-	//removeCmd.Flags().StringVarP(&internal.RemoveOptions.SearchPath, "include-only", "i", "",
+	//removeCmd.Flags().StringVarP(&internal.opts.SearchPath, "include-only", "i", "",
 	//	"Used to execute only in reading into the path/directory provided")
 	return removeCmd
 }

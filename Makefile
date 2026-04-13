@@ -42,7 +42,8 @@ build:
 	@mkdir -p bin
 	GOOS=$(GOOS) GOARCH=$(GOARCH) go build \
 		-ldflags "$(LD_FLAGS)" \
-		-o bin/$(ARTIFACT_NAME)-$(GOOS)-$(GOARCH)
+		-o bin/$(ARTIFACT_NAME)-$(GOOS)-$(GOARCH) \
+		./cmd/main
 
 .PHONY: test
 test::
@@ -65,7 +66,6 @@ lint: test license
 	yamllint .
 	@echo -e "\n$(CYAN)gitleaks$(NC)"
 	gitleaks detect . --no-git --verbose --config=.gitleaks.toml
-
 
 .PHONY: license
 license: build

@@ -19,32 +19,98 @@ limitations under the License.
 */
 
 import (
+	"bytes"
+	"os"
 	"testing"
 
+	"github.com/Bugs5382/golic"
+	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestInject(t *testing.T) {
-	root, out := SetupTest()
 
-	t.Run("inject with missing ignore file", func(t *testing.T) {
-		out.Reset()
-		root.SetArgs([]string{"inject"})
-		err := root.Execute()
-		assert.ErrorContains(t, err, "ensure '.licignore' exists")
-	})
+	_ = os.Chdir(golic.GetProjectRoot())
 
-	t.Run("inject with missing template", func(t *testing.T) {
-		out.Reset()
-		root.SetArgs([]string{"inject", "-l", "../../.licignore"})
-		err := root.Execute()
+	zerolog.SetGlobalLevel(zerolog.Disabled)
+
+	t.Parallel()
+
+	t.Run("inject -- template missing", func(t *testing.T) {
+		cmd := RootCmd()
+
+		b := new(bytes.Buffer)
+
+		cmd.SetOut(b)
+		cmd.SetErr(b)
+
+		cmd.SetArgs([]string{
+			"inject",
+		})
+
+		err := cmd.Execute()
+
 		assert.ErrorContains(t, err, "licence template not provided")
 	})
 
-	t.Run("inject with mit", func(t *testing.T) {
-		out.Reset()
-		root.SetArgs([]string{"inject", "-p", "../../.golic.yaml", "-l", "../../.licignore", "-t", "mit", "-d"})
-		_ = root.Execute()
+	t.Run("inject -- custom config file not found", func(t *testing.T) {
+		cmd := RootCmd()
+
+		b := new(bytes.Buffer)
+
+		cmd.SetOut(b)
+		cmd.SetErr(b)
+
+		cmd.SetArgs([]string{
+			"inject",
+			"-p",
+			".golic-test.yaml",
+			"-d", // safety
+		})
+
+		err := cmd.Execute()
+
+		assert.ErrorContains(t, err, "custom config file not found: check path: .golic-test.yaml")
+	})
+
+	t.Run("inject -- custom lic ignore not found", func(t *testing.T) {
+		cmd := RootCmd()
+
+		b := new(bytes.Buffer)
+
+		cmd.SetOut(b)
+		cmd.SetErr(b)
+
+		cmd.SetArgs([]string{
+			"inject",
+			"-l",
+			".licignoreNotFound",
+			"-d", // safety
+		})
+
+		err := cmd.Execute()
+
+		assert.ErrorContains(t, err, "custom config file not found: check path: .licignoreNotFound")
+	})
+
+	t.Run("inject -- template mit (no error)", func(t *testing.T) {
+		cmd := RootCmd()
+
+		b := new(bytes.Buffer)
+
+		cmd.SetOut(b)
+		cmd.SetErr(b)
+
+		cmd.SetArgs([]string{
+			"inject",
+			"-t",
+			"mit",
+			"-d", // safety
+		})
+
+		err := cmd.Execute()
+
+		assert.NoError(t, err)
 	})
 
 }

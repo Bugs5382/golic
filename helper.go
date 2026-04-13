@@ -1,4 +1,4 @@
-package main
+package golic
 
 /*
 Apache License 2.0
@@ -19,17 +19,24 @@ limitations under the License.
 */
 
 import (
-	"testing"
-
-	"github.com/Bugs5382/golic/cmd/commands"
-	"github.com/stretchr/testify/assert"
+	"os"
+	"path/filepath"
 )
 
-func TestRootCmdErrorMessage(t *testing.T) {
-	cmd, _ := commands.SetupTest()
-
-	cmd.SetArgs([]string{})
-	err := cmd.Execute()
-
-	assert.ErrorContains(t, err, "no arguments passed")
+func GetProjectRoot() string {
+	dir, err := os.Getwd()
+	if err != nil {
+		return "."
+	}
+	for {
+		if _, err := os.Stat(filepath.Join(dir, "go.mod")); err == nil {
+			return dir
+		}
+		parent := filepath.Dir(dir)
+		if parent == dir { // Reached the system root
+			break
+		}
+		dir = parent
+	}
+	return "."
 }

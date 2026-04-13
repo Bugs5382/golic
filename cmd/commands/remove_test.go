@@ -19,26 +19,29 @@ limitations under the License.
 */
 
 import (
+	"bytes"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestRemove(t *testing.T) {
-	root, out := SetupTest()
+	t.Parallel()
 
-	t.Run("remove with missing config file", func(t *testing.T) {
-		out.Reset()
-		root.SetArgs([]string{"remove"})
-		err := root.Execute()
-		assert.ErrorContains(t, err, "ensure '.licignore' exists")
-	})
+	t.Run("remove -- template missing", func(t *testing.T) {
+		cmd := RootCmd()
 
-	t.Run("remove with missing template", func(t *testing.T) {
-		out.Reset()
-		root.SetArgs([]string{"remove", "-l", "../../.licignore"})
-		err := root.Execute()
+		b := new(bytes.Buffer)
+
+		cmd.SetOut(b)
+		cmd.SetErr(b)
+
+		cmd.SetArgs([]string{
+			"remove",
+		})
+
+		err := cmd.Execute()
+
 		assert.ErrorContains(t, err, "licence template not provided")
 	})
-
 }

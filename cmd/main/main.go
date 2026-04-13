@@ -19,7 +19,6 @@ limitations under the License.
 */
 
 import (
-	_ "embed"
 	"fmt"
 	"os"
 
@@ -28,14 +27,11 @@ import (
 	"github.com/enescakir/emoji"
 )
 
-//go:embed .golic.yaml
-var golicConfig string
-
 func main() {
 
 	logging.Init()
 
-	if err := commands.RootCmd(golicConfig).Execute(); err != nil {
+	if err := commands.RootCmd().Execute(); err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "%v  Error: %v\n", emoji.Bomb, err)
 		os.Exit(1)
 	}

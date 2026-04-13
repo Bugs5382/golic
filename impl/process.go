@@ -34,6 +34,7 @@ type Process struct {
 	Ctx  context.Context
 	Opts internal.Options
 
+	cfgBase  *Config
 	cfg      *Config
 	ignore   gitignore.GitIgnore
 	modified int
@@ -55,7 +56,7 @@ func (u *Process) Run() (err error) {
 	log.Debug().Msgf("%s reading template: %s", emoji.OpenBook, u.Opts.Template)
 	log.Debug().Msgf("%s reading search path: %s", emoji.OpenBook, u.Opts.SearchPath)
 
-	if u.cfg, err = u.readCommonConfig(); err != nil {
+	if u.cfgBase, err = u.readCommonConfig(); err != nil {
 		return
 	}
 
@@ -88,7 +89,7 @@ func (u *Process) Run() (err error) {
 			Msgf("Final Configuration Loaded:\n---\n%s\n---", string(confBytes))
 	}
 
-	u.traverseFiles()
+	err = u.traverseFiles()
 
 	return
 }

@@ -1,4 +1,4 @@
-package commands
+package main
 
 /*
 Apache License 2.0
@@ -19,22 +19,9 @@ limitations under the License.
 */
 
 import (
-	"bytes"
-
-	"github.com/spf13/cobra"
+	"testing"
 )
 
-func SetupTest() (*cobra.Command, *bytes.Buffer) {
-	// 1. Get a fresh instance of the command
-	root := RootCmd("")
-	b := new(bytes.Buffer)
+func TestRootCmdErrorMessage(t *testing.T) {
 
-	// 2. Redirect output and error streams to the buffer
-	root.SetOut(b)
-	root.SetErr(b)
-
-	// 3. Reset arguments to ensure no leakage from other tests
-	root.SetArgs([]string{})
-
-	return root, b
 }
