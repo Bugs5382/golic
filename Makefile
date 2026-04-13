@@ -20,10 +20,9 @@ TESTPARALLELISM := 4
 WORKING_DIR := $(shell pwd)
 
 VERSION ?= v0.1.0
-MODULE   := $(shell go list -m)
 GOOS     ?= $(shell go env GOOS)
 GOARCH   ?= $(shell go env GOARCH)
-LD_FLAGS := -X $(MODULE)/internal/buildinfo.Version=$(VERSION)
+LD_FLAGS := -X github.com/Bugs5382/golic/internal/buildinfo.Version=$(VERSION)
 
 ifndef NO_COLOR
 YELLOW=\033[0;33m
@@ -69,8 +68,8 @@ lint: test license
 
 .PHONY: license
 license: build
-	./bin/golic-$(GOOS)-$(GOARCH) inject -c "2006 Shane" -t apache2
+	./bin/golic-$(GOOS)-$(GOARCH) inject -c "2026 Shane" -t apache2
 
 .PHONY: license-dry
 license-dry: build
-	./bin/golic-$(GOOS)-$(GOARCH) inject -c "2006 Shane" -t apache2 -d
+	./bin/golic-$(GOOS)-$(GOARCH) inject -c "2026 Shane" -t apache2 -d
