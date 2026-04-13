@@ -31,5 +31,5 @@ jobs:
 
       - name: GoLic
         run: |
-          go build -o ./bin/golic main.go
-          ./bin/golic inject --dry -c "2026 Shane" -t apache2
+          go build -o ./bin/golic ./cmd/main
+          ./bin/golic inject -c "2026 Shane" -t apache2 -d
