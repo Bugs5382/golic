@@ -41,6 +41,3 @@ type Options struct {
 }
 
 var Year = time.Now().Year()
-
-var InjectOptions Options
-var RemoveOptions Options
