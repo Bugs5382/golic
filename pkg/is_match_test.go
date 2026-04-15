@@ -3,7 +3,7 @@ package pkg_test
 /*
 Apache License 2.0
 
-Copyright 2006 Shane
+Copyright 2026 Shane
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -27,19 +27,25 @@ import (
 
 func TestMatchRule(t *testing.T) {
 	config := &impl.Config{
-		Golic: struct {
-			Licenses   map[string]string    `yaml:"licenses"`
-			Rules      map[string]impl.Rule `yaml:"rules"`
-			MergeRules bool                 `yaml:"mergeRules"`
-		}{
-			Licenses: make(map[string]string),
-			Rules: map[string]impl.Rule{
-				"Makefile":               {Prefix: "#"},
-				"**/templates/**/*.yaml": {Prefix: "{{/*", Suffix: "*/}}"},
-				"*.go":                   {Prefix: "/*", Suffix: "*/"},
-				"cmd/server/main.go":     {Prefix: "//"},
-			},
+		Golic: impl.GolicConfig{
+			Licenses:   make(map[string]string),
 			MergeRules: false,
+			Rules: map[string]impl.Rule{
+				"Makefile": {
+					Prefix: "#",
+				},
+				"**/templates/**/*.yaml": {
+					Prefix: "{{/*",
+					Suffix: "*/}}",
+				},
+				"*.go": {
+					Prefix: "/*",
+					Suffix: "*/",
+				},
+				"cmd/server/main.go": {
+					Prefix: "//",
+				},
+			},
 		},
 	}
 

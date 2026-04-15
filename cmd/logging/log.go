@@ -3,7 +3,7 @@ package logging
 /*
 Apache License 2.0
 
-Copyright 2006 Shane
+Copyright 2026 Shane
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ limitations under the License.
 
 import (
 	"os"
-	"strconv"
 	"strings"
 	"time"
 
@@ -29,9 +28,33 @@ import (
 )
 
 // Init sets up logging configuration
-func Init() {
-	setLogLevel()
+func Init(verbose bool) {
+	// If we are in a test, stop everything immediately.
+	if isTest() {
+		zerolog.SetGlobalLevel(zerolog.Disabled)
+		return
+	}
+
 	setLogFormat()
+
+	levelStr := os.Getenv("LOG_LEVEL")
+	if levelStr != "" {
+		if parsedLevel, err := zerolog.ParseLevel(strings.ToLower(levelStr)); err == nil {
+			zerolog.SetGlobalLevel(parsedLevel)
+			return
+		}
+	}
+
+	if verbose {
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	} else {
+		zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	}
+}
+
+func isTest() bool {
+	return strings.HasSuffix(os.Args[0], ".test") ||
+		strings.Contains(strings.Join(os.Args, " "), "-test.")
 }
 
 func setLogFormat() {
@@ -46,28 +69,4 @@ func setLogFormat() {
 		Out:        os.Stderr,
 		TimeFormat: time.RFC3339,
 	})
-}
-
-func setLogLevel() {
-	levelStr := os.Getenv("LOG_LEVEL")
-
-	if levelStr == "" {
-		zerolog.SetGlobalLevel(zerolog.InfoLevel)
-		return
-	}
-
-	parsedLevel, err := zerolog.ParseLevel(levelStr)
-	if err == nil {
-		zerolog.SetGlobalLevel(parsedLevel)
-		return
-	}
-
-	// 3. Fallback: Try parsing as an integer (e.g., "0" for debug, "1" for info)
-	if levelInt, err := strconv.Atoi(levelStr); err == nil {
-		zerolog.SetGlobalLevel(zerolog.Level(levelInt))
-		return
-	}
-
-	zerolog.SetGlobalLevel(zerolog.InfoLevel)
-	log.Debug().Msgf("Invalid log level '%s', defaulting to info", levelStr)
 }

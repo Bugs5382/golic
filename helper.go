@@ -1,9 +1,9 @@
-package main
+package golic
 
 /*
 Apache License 2.0
 
-Copyright 2006 Shane
+Copyright 2026 Shane
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,24 +19,24 @@ limitations under the License.
 */
 
 import (
-	_ "embed"
-	"fmt"
 	"os"
-
-	"github.com/Bugs5382/golic/cmd/commands"
-	"github.com/Bugs5382/golic/cmd/logging"
-	"github.com/enescakir/emoji"
+	"path/filepath"
 )
 
-//go:embed .golic.yaml
-var golicConfig string
-
-func main() {
-
-	logging.Init()
-
-	if err := commands.RootCmd(golicConfig).Execute(); err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "%v  Error: %v\n", emoji.Bomb, err)
-		os.Exit(1)
+func GetProjectRoot() string {
+	dir, err := os.Getwd()
+	if err != nil {
+		return "."
 	}
+	for {
+		if _, err := os.Stat(filepath.Join(dir, "go.mod")); err == nil {
+			return dir
+		}
+		parent := filepath.Dir(dir)
+		if parent == dir { // Reached the system root
+			break
+		}
+		dir = parent
+	}
+	return "."
 }

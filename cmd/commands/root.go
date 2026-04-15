@@ -3,7 +3,7 @@ package commands
 /*
 Apache License 2.0
 
-Copyright 2006 Shane
+Copyright 2026 Shane
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,12 +19,16 @@ limitations under the License.
 */
 
 import (
+	_ "embed"
 	"fmt"
 
+	"github.com/Bugs5382/golic/impl"
 	"github.com/spf13/cobra"
 )
 
-func RootCmd(masterConfig string) *cobra.Command {
+var BaseConfig *impl.Config
+
+func RootCmd() *cobra.Command {
 	var verbose bool
 
 	// command
@@ -48,8 +52,8 @@ func RootCmd(masterConfig string) *cobra.Command {
 
 	// sub commands
 	rootCmd.AddCommand(VersionCmd())
-	rootCmd.AddCommand(InjectCmd(masterConfig))
-	rootCmd.AddCommand(RemoveCmd(masterConfig))
+	rootCmd.AddCommand(InjectCmd())
+	rootCmd.AddCommand(RemoveCmd())
 
 	return rootCmd
 }

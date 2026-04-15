@@ -3,7 +3,7 @@ package impl
 /*
 Apache License 2.0
 
-Copyright 2006 Shane
+Copyright 2026 Shane
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -24,12 +24,14 @@ type Rule struct {
 	Under  []string `yaml:"under"`
 }
 
+type GolicConfig struct {
+	Licenses   map[string]string `yaml:"licenses"`
+	MergeRules bool              `yaml:"mergeRules"`
+	Rules      map[string]Rule   `yaml:"rules"`
+}
+
 type Config struct {
-	Golic struct {
-		Licenses   map[string]string `yaml:"licenses"`
-		Rules      map[string]Rule   `yaml:"rules"`
-		MergeRules bool              `yaml:"mergeRules"`
-	} `yaml:"golic"`
+	Golic GolicConfig `yaml:"golic"`
 }
 
 func (c *Config) IsWrapped(key string) bool {

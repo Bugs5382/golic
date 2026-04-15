@@ -1,6 +1,6 @@
 # Apache License 2.0
 #
-# Copyright 2006 Shane
+# Copyright 2026 Shane
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,11 +19,10 @@ ARTIFACT_NAME := golic
 TESTPARALLELISM := 4
 WORKING_DIR := $(shell pwd)
 
-VERSION ?= v0.1.0
-MODULE   := $(shell go list -m)
+VERSION  ?= v0.1.0
 GOOS     ?= $(shell go env GOOS)
 GOARCH   ?= $(shell go env GOARCH)
-LD_FLAGS := -X $(MODULE)/internal/buildinfo.Version=$(VERSION)
+LD_FLAGS := -X github.com/Bugs5382/golic/internal/buildinfo.Version=$(VERSION)
 
 ifndef NO_COLOR
 YELLOW=\033[0;33m
@@ -42,7 +41,8 @@ build:
 	@mkdir -p bin
 	GOOS=$(GOOS) GOARCH=$(GOARCH) go build \
 		-ldflags "$(LD_FLAGS)" \
-		-o bin/$(ARTIFACT_NAME)-$(GOOS)-$(GOARCH)
+		-o bin/$(ARTIFACT_NAME)-$(GOOS)-$(GOARCH) \
+		./cmd/main
 
 .PHONY: test
 test::
@@ -50,27 +50,21 @@ test::
 
 .PHONY: lint-init
 lint-init:
-	@echo -e "\n$(CYAN)Check for lint dependencies$(NC)"
 	brew install golangci-lint
 	brew install gitleaks
 	brew install yamllint
 
 .PHONY: lint
 lint: test license
-	@echo -e "\n$(YELLOW)Running the linters$(NC)"
-	@echo -e "\n$(CYAN)golangci-lint$(NC)"
 	goimports -w ./
 	golangci-lint run
-	@echo -e "\n$(CYAN)yamllint$(NC)"
 	yamllint .
-	@echo -e "\n$(CYAN)gitleaks$(NC)"
 	gitleaks detect . --no-git --verbose --config=.gitleaks.toml
-
 
 .PHONY: license
 license: build
-	./bin/golic-$(GOOS)-$(GOARCH) inject -c "2006 Shane" -t apache2
+	./bin/golic-$(GOOS)-$(GOARCH) inject -c "2026 Shane" -t apache2
 
 .PHONY: license-dry
 license-dry: build
-	./bin/golic-$(GOOS)-$(GOARCH) inject -c "2006 Shane" -t apache2 -d
+	./bin/golic-$(GOOS)-$(GOARCH) inject -c "2026 Shane" -t apache2 -d

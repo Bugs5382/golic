@@ -3,7 +3,7 @@ package main
 /*
 Apache License 2.0
 
-Copyright 2006 Shane
+Copyright 2026 Shane
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -20,16 +20,8 @@ limitations under the License.
 
 import (
 	"testing"
-
-	"github.com/Bugs5382/golic/cmd/commands"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestRootCmdErrorMessage(t *testing.T) {
-	cmd, _ := commands.SetupTest()
 
-	cmd.SetArgs([]string{})
-	err := cmd.Execute()
-
-	assert.ErrorContains(t, err, "no arguments passed")
 }

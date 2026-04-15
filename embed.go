@@ -1,9 +1,9 @@
-package commands
+package golic
 
 /*
 Apache License 2.0
 
-Copyright 2006 Shane
+Copyright 2026 Shane
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,23 +18,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import (
-	"bytes"
+import _ "embed"
 
-	"github.com/spf13/cobra"
-)
-
-func SetupTest() (*cobra.Command, *bytes.Buffer) {
-	// 1. Get a fresh instance of the command
-	root := RootCmd("")
-	b := new(bytes.Buffer)
-
-	// 2. Redirect output and error streams to the buffer
-	root.SetOut(b)
-	root.SetErr(b)
-
-	// 3. Reset arguments to ensure no leakage from other tests
-	root.SetArgs([]string{})
-
-	return root, b
-}
+//go:embed .golic.yaml
+var DefaultConfig string

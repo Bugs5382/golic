@@ -1,4 +1,4 @@
-package internal
+package main
 
 /*
 Apache License 2.0
@@ -18,26 +18,21 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import "time"
+import (
+	"fmt"
+	"os"
 
-type LicenseCommandType int
-
-const (
-	LicenseInject LicenseCommandType = 0
-	LicenseRemove LicenseCommandType = 1
+	"github.com/Bugs5382/golic/cmd/commands"
+	"github.com/Bugs5382/golic/cmd/logging"
+	"github.com/enescakir/emoji"
 )
 
-type Options struct {
-	LicIgnore          string
-	Copyright          string
-	Dry                bool
-	ConfigPath         string
-	SearchPath         string
-	Template           string
-	ModifiedExitStatus bool
-	MasterConfig       string
-	Type               LicenseCommandType
-	Verbose            bool
-}
+func main() {
 
-var Year = time.Now().Year()
+	logging.Init(false)
+
+	if err := commands.RootCmd().Execute(); err != nil {
+		_, _ = fmt.Fprintf(os.Stderr, "%v  Error: %v\n", emoji.Bomb, err)
+		os.Exit(1)
+	}
+}

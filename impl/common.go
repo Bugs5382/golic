@@ -3,7 +3,7 @@ package impl
 /*
 Apache License 2.0
 
-Copyright 2006 Shane
+Copyright 2026 Shane
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/Bugs5382/golic"
 	"github.com/Bugs5382/golic/internal"
 	"github.com/Bugs5382/golic/pkg"
 	"github.com/denormal/go-gitignore"
@@ -42,7 +43,7 @@ func injectFile(path string, o internal.Options, config *Config) (rule string, s
 	rule = getRule(config, path)
 	license, err := getCommentedLicense(config, o, rule)
 	if err != nil {
-		return rule, false, err
+		return "", false, err
 	}
 	// license is injected, continue
 	if strings.Contains(source, license) {
@@ -80,53 +81,81 @@ func removeFile(path string, o internal.Options, config *Config) (rule string, s
 }
 
 // readCommonConfig Read the commong/master config
-func (u *Process) readCommonConfig() (c *Config, err error) {
-	c = &Config{}
-	err = yaml.Unmarshal([]byte(u.Opts.MasterConfig), c)
-	return
+func (u *Process) readCommonConfig() (*Config, error) {
+	c := &Config{}
+	rawYaml := golic.DefaultConfig
+
+	if err := yaml.Unmarshal([]byte(rawYaml), c); err != nil {
+		return nil, fmt.Errorf("failed to parse master config: %w", err)
+	}
+
+	return c, nil
 }
 
 // readLocalConfig Read the local config.
 func (u *Process) readLocalConfig() (*Config, error) {
-	var rc = *u.cfg
+	var rc = &Config{}
 
 	if rc.Golic.Licenses == nil {
 		rc.Golic.Licenses = make(map[string]string)
 	}
+
+	if u.cfgBase.Golic.Licenses != nil {
+		for k, v := range u.cfgBase.Golic.Licenses {
+			rc.Golic.Licenses[k] = v
+		}
+	}
+
 	if rc.Golic.Rules == nil {
 		rc.Golic.Rules = make(map[string]Rule)
 	}
 
+	if u.cfgBase.Golic.Rules != nil {
+		for k, v := range u.cfgBase.Golic.Rules {
+			rc.Golic.Rules[k] = v
+		}
+	}
+
+	// If the path is empty or file doesn't exist, we return the base copy immediately
+	if u.Opts.ConfigPath == "" {
+		return rc, nil
+	}
+
 	yamlFile, err := os.ReadFile(u.Opts.ConfigPath)
 	if err != nil {
-		return &rc, nil
+		if os.IsNotExist(err) {
+			return rc, nil
+		}
+		return nil, fmt.Errorf("failed to read local config at %s: %w", u.Opts.ConfigPath, err)
 	}
 
-	var c = &Config{}
-	c.Golic.MergeRules = true
+	var localCfg = &Config{}
+	localCfg.Golic.MergeRules = true // Set default expectation
 
-	err = yaml.Unmarshal(yamlFile, c)
-	if err != nil {
-		return &rc, nil
+	if err := yaml.Unmarshal(yamlFile, localCfg); err != nil {
+		return nil, fmt.Errorf("failed to parse local config: %w", err)
 	}
 
-	for k, v := range c.Golic.Licenses {
+	// If localCfg has licenses, they overwrite/append to the base in rc
+	for k, v := range localCfg.Golic.Licenses {
 		rc.Golic.Licenses[k] = v
 	}
 
-	if c.Golic.MergeRules {
-		for k, v := range c.Golic.Rules {
+	if localCfg.Golic.MergeRules {
+		// Append or overwrite individual rules
+		for k, v := range localCfg.Golic.Rules {
 			rc.Golic.Rules[k] = v
 		}
-	} else if len(c.Golic.Rules) > 0 {
-		rc.Golic.Rules = c.Golic.Rules
+	} else if len(localCfg.Golic.Rules) > 0 {
+		// Replace the entire ruleset if MergeRules is explicitly false
+		rc.Golic.Rules = localCfg.Golic.Rules
 	}
 
-	return &rc, nil
+	return rc, nil
 }
 
 // traverseFiles Go through all files in paths and process. Will ignore files and folders that match GitIgnore.
-func (u *Process) traverseFiles() {
+func (u *Process) traverseFiles() error {
 	skipped := 0
 	visited := 0
 	p := func(path string, i gitignore.GitIgnore, o internal.Options, config *Config) (err error) {
@@ -157,7 +186,7 @@ func (u *Process) traverseFiles() {
 			}
 
 			if log.Debug().Enabled() {
-				_, _ = emoji.Printf("%s %s  %s %s %s\n",
+				log.Info().Msgf("%s %s  %s %s %s",
 					prefix,
 					emoji.Minus,
 					cp,
@@ -165,7 +194,7 @@ func (u *Process) traverseFiles() {
 					aurora.Gray(12, fmt.Sprintf("[%s]", rule)),
 				)
 			} else {
-				_, _ = emoji.Printf("%s %s  %s %s\n",
+				log.Info().Msgf("%s %s  %s %s",
 					prefix,
 					emoji.Minus,
 					cp,
@@ -188,11 +217,13 @@ func (u *Process) traverseFiles() {
 		})
 
 	if err != nil {
-		log.Error()
+		return err
 	}
 
 	u.modified = visited - skipped
 	displaySummary(skipped, visited)
+
+	return nil
 }
 
 // processUpdate Update the file, but how?
@@ -208,10 +239,10 @@ func processUpdate(path string, o internal.Options, config *Config) (rule string
 
 func displaySummary(skipped, visited int) {
 	if skipped == visited {
-		fmt.Printf("\n %s %v/%v %s\n\n", emoji.Ice, aurora.BrightCyan(visited-skipped), aurora.BrightWhite(visited), aurora.BrightCyan("changed"))
+		log.Info().Msgf("%s %v/%v %s", emoji.Ice, aurora.BrightCyan(visited-skipped), aurora.BrightWhite(visited), aurora.BrightCyan("changed"))
 		return
 	}
-	fmt.Printf("\n %s %v/%v %s\n\n", emoji.Fire, aurora.BrightYellow(visited-skipped), aurora.BrightWhite(visited), aurora.BrightYellow("changed"))
+	log.Info().Msgf("%s %v/%v %s", emoji.Fire, aurora.BrightYellow(visited-skipped), aurora.BrightWhite(visited), aurora.BrightYellow("changed"))
 }
 
 // read File

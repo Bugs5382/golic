@@ -3,7 +3,7 @@ package commands
 /*
 Apache License 2.0
 
-Copyright 2006 Shane
+Copyright 2026 Shane
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,18 +19,33 @@ limitations under the License.
 */
 
 import (
+	"bytes"
+	"os"
 	"testing"
 
+	"github.com/Bugs5382/golic"
+	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestRoot(t *testing.T) {
-	root, out := SetupTest()
+	_ = os.Chdir(golic.GetProjectRoot())
+
+	zerolog.SetGlobalLevel(zerolog.Disabled)
+
+	t.Parallel()
 
 	t.Run("root no args passed", func(t *testing.T) {
-		out.Reset()
-		root.SetArgs([]string{})
-		err := root.Execute()
+		cmd := RootCmd()
+
+		b := new(bytes.Buffer)
+
+		cmd.SetOut(b)
+		cmd.SetErr(b)
+
+		cmd.SetArgs([]string{})
+
+		err := cmd.Execute()
 		assert.ErrorContains(t, err, "no arguments passed")
 	})
 

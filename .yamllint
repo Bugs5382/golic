@@ -31,5 +31,4 @@ rules:
   truthy: disable
 
 ignore:
-  - "**/templates/*.yaml"
   - ".golic.yaml"

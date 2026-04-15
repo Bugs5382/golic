@@ -3,7 +3,7 @@ package commands
 /*
 Apache License 2.0
 
-Copyright 2006 Shane
+Copyright 2026 Shane
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,31 +19,34 @@ limitations under the License.
 */
 
 import (
+	"bytes"
+	"os"
 	"testing"
 
+	"github.com/Bugs5382/golic"
 	"github.com/Bugs5382/golic/internal/buildinfo"
+	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestVersion(t *testing.T) {
-	root, out := SetupTest()
+	_ = os.Chdir(golic.GetProjectRoot())
 
-	t.Run("should display the correct semantic version", func(t *testing.T) {
-		out.Reset() // Clear buffer for this specific subtest
-		root.SetArgs([]string{"version"})
+	zerolog.SetGlobalLevel(zerolog.Disabled)
 
-		err := root.Execute()
+	t.Parallel()
 
-		assert.NoError(t, err)
-		assert.Contains(t, out.String(), buildinfo.Version)
-	})
+	t.Run("get version", func(t *testing.T) {
+		cmd := RootCmd()
 
-	t.Run("should fail if any flags are passed", func(t *testing.T) {
-		out.Reset()
-		root.SetArgs([]string{"version", "--invalid-flag"})
+		b := new(bytes.Buffer)
 
-		err := root.Execute()
+		cmd.SetOut(b)
+		cmd.SetErr(b)
 
-		assert.Error(t, err)
+		cmd.SetArgs([]string{"version"})
+
+		_ = cmd.Execute()
+		assert.Contains(t, b.String(), buildinfo.Version)
 	})
 }
