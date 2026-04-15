@@ -19,7 +19,7 @@ ARTIFACT_NAME := golic
 TESTPARALLELISM := 4
 WORKING_DIR := $(shell pwd)
 
-VERSION ?= v0.1.0
+VERSION  ?= v0.1.0
 GOOS     ?= $(shell go env GOOS)
 GOARCH   ?= $(shell go env GOARCH)
 LD_FLAGS := -X github.com/Bugs5382/golic/internal/buildinfo.Version=$(VERSION)
