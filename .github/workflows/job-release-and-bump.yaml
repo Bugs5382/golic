@@ -17,6 +17,8 @@
 name: Version Manager
 
 on:
+  workflow_dispatch:
+  workflow_call:
   push:
     branches:
       - main
