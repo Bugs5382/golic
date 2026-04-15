@@ -1,5 +1,17 @@
 # Golic Change Log
 
+## v0.1.1-beta.0 - 2026-04-15
+
+#### What Changed 👀
+
+#### 🐛 Bug Fixes
+
+- fix: double golic.yaml @Bugs5382 (#14)
+
+### Extra
+
+**Full Changelog**: https://github.com/Bugs5382/golic/compare/v0.1.0...v0.1.1-beta.0
+
 ## v0.1.0 - 2026-04-12
 
 #### What Changed 👀
