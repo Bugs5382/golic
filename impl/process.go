@@ -56,20 +56,18 @@ func (u *Process) Run() (err error) {
 	log.Debug().Msgf("%s reading template: %s", emoji.OpenBook, u.Opts.Template)
 	log.Debug().Msgf("%s reading search path: %s", emoji.OpenBook, u.Opts.SearchPath)
 
-	if u.cfgBase, err = u.readCommonConfig(); err != nil {
-		return
-	}
-
 	u.ignore, err = gitignore.NewFromFile(u.Opts.LicIgnore)
 	if err != nil {
 		return err
 	}
 
+	if u.cfgBase, err = u.readCommonConfig(); err != nil {
+		return
+	}
+
 	if _, err = os.Stat(u.Opts.ConfigPath); !os.IsNotExist(err) {
 		log.Debug().Msgf("%s reading %s", emoji.OpenBook, aurora.BrightCyan(u.Opts.ConfigPath))
-		log.Debug().Msgf("%s merging %s with %s",
-			emoji.ConstructionWorker, aurora.BrightCyan(u.Opts.ConfigPath),
-			aurora.BrightCyan("master config"))
+		log.Debug().Msgf("%s merging %s with %s", emoji.ConstructionWorker, aurora.BrightCyan(u.Opts.ConfigPath), aurora.BrightCyan("master config"))
 		if u.cfg, err = u.readLocalConfig(); err != nil {
 			return
 		}
@@ -79,6 +77,7 @@ func (u *Process) Run() (err error) {
 		} else {
 			log.Debug().Msgf("%s skipping local %s", emoji.FileFolder, aurora.BrightCyan(u.Opts.ConfigPath))
 		}
+		u.cfg = u.cfgBase
 	}
 
 	if log.Debug().Enabled() {

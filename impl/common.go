@@ -25,6 +25,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/Bugs5382/golic"
 	"github.com/Bugs5382/golic/internal"
 	"github.com/Bugs5382/golic/pkg"
 	"github.com/denormal/go-gitignore"
@@ -80,10 +81,15 @@ func removeFile(path string, o internal.Options, config *Config) (rule string, s
 }
 
 // readCommonConfig Read the commong/master config
-func (u *Process) readCommonConfig() (c *Config, err error) {
-	c = &Config{}
-	err = yaml.Unmarshal([]byte(u.Opts.MasterConfig), c)
-	return
+func (u *Process) readCommonConfig() (*Config, error) {
+	c := &Config{}
+	rawYaml := golic.DefaultConfig
+
+	if err := yaml.Unmarshal([]byte(rawYaml), c); err != nil {
+		return nil, fmt.Errorf("failed to parse master config: %w", err)
+	}
+
+	return c, nil
 }
 
 // readLocalConfig Read the local config.
@@ -91,7 +97,7 @@ func (u *Process) readLocalConfig() (*Config, error) {
 	var rc = &Config{}
 
 	if rc.Golic.Licenses == nil {
-		rc.Golic.Licenses = make(map[string]string) // or whatever the value type is
+		rc.Golic.Licenses = make(map[string]string)
 	}
 
 	if u.cfgBase.Golic.Licenses != nil {
@@ -100,7 +106,6 @@ func (u *Process) readLocalConfig() (*Config, error) {
 		}
 	}
 
-	// 2. Ensure the Rules map is initialized
 	if rc.Golic.Rules == nil {
 		rc.Golic.Rules = make(map[string]Rule)
 	}
@@ -118,11 +123,10 @@ func (u *Process) readLocalConfig() (*Config, error) {
 
 	yamlFile, err := os.ReadFile(u.Opts.ConfigPath)
 	if err != nil {
-		// Silently fall back to base if the file is simply missing
 		if os.IsNotExist(err) {
 			return rc, nil
 		}
-		return nil, fmt.Errorf("failed to read local config: %w", err)
+		return nil, fmt.Errorf("failed to read local config at %s: %w", u.Opts.ConfigPath, err)
 	}
 
 	var localCfg = &Config{}

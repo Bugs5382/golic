@@ -32,9 +32,15 @@ func setupAndValidate(cmd *cobra.Command, opts *internal.Options) error {
 	verbose, _ := cmd.Flags().GetBool("verbose")
 	logging.Init(verbose)
 
+	configFlagChanged := cmd.Flags().Changed("config-path")
+
 	if opts.ConfigPath != "" {
-		if _, err := os.Stat(opts.ConfigPath); os.IsNotExist(err) {
-			return fmt.Errorf("custom config file not found: %s", opts.ConfigPath)
+		_, err := os.Stat(opts.ConfigPath)
+		if os.IsNotExist(err) {
+			if configFlagChanged {
+				return fmt.Errorf("custom config file not found: %s", opts.ConfigPath)
+			}
+			opts.ConfigPath = ""
 		}
 	}
 

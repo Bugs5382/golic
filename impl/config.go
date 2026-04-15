@@ -24,12 +24,14 @@ type Rule struct {
 	Under  []string `yaml:"under"`
 }
 
+type GolicConfig struct {
+	Licenses   map[string]string `yaml:"licenses"`
+	MergeRules bool              `yaml:"mergeRules"`
+	Rules      map[string]Rule   `yaml:"rules"`
+}
+
 type Config struct {
-	Golic struct {
-		Licenses   map[string]string `yaml:"licenses"`
-		Rules      map[string]Rule   `yaml:"rules"`
-		MergeRules bool              `yaml:"mergeRules"`
-	} `yaml:"golic"`
+	Golic GolicConfig `yaml:"golic"`
 }
 
 func (c *Config) IsWrapped(key string) bool {
