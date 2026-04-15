@@ -51,6 +51,9 @@ jobs:
       - name: Release Drafter (Anticipate Version)
         id: drafter
         uses: release-drafter/release-drafter@v6
+        with:
+          prerelease: false
+          latest: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
