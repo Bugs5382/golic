@@ -50,20 +50,15 @@ test::
 
 .PHONY: lint-init
 lint-init:
-	@echo -e "\n$(CYAN)Check for lint dependencies$(NC)"
 	brew install golangci-lint
 	brew install gitleaks
 	brew install yamllint
 
 .PHONY: lint
 lint: test license
-	@echo -e "\n$(YELLOW)Running the linters$(NC)"
-	@echo -e "\n$(CYAN)golangci-lint$(NC)"
 	goimports -w ./
 	golangci-lint run
-	@echo -e "\n$(CYAN)yamllint$(NC)"
 	yamllint .
-	@echo -e "\n$(CYAN)gitleaks$(NC)"
 	gitleaks detect . --no-git --verbose --config=.gitleaks.toml
 
 .PHONY: license
