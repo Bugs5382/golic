@@ -37,4 +37,4 @@ jobs:
       - name: GoLic (Branch Build)
         if: github.ref_name != 'main'
         run: |
-          go install github.com/Bugs5382/golic/cmd/golic@${{ github.ref_name }}
+          go install github.com/Bugs5382/golic/cmd/golic@${{ github.head_ref }}
