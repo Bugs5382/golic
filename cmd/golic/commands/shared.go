@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Bugs5382/golic/cmd/logging"
+	"github.com/Bugs5382/golic/cmd/golic/logging"
 	"github.com/Bugs5382/golic/internal"
 	"github.com/spf13/cobra"
 )

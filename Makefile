@@ -42,7 +42,7 @@ build:
 	GOOS=$(GOOS) GOARCH=$(GOARCH) go build \
 		-ldflags "$(LD_FLAGS)" \
 		-o bin/$(ARTIFACT_NAME)-$(GOOS)-$(GOARCH) \
-		./cmd/main
+		./cmd/golic
 
 .PHONY: test
 test::
