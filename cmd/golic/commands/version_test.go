@@ -24,7 +24,7 @@ import (
 	"testing"
 
 	"github.com/Bugs5382/golic"
-	"github.com/Bugs5382/golic/internal/buildinfo"
+	"github.com/Bugs5382/golic/internal"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
 )
@@ -47,6 +47,6 @@ func TestVersion(t *testing.T) {
 		cmd.SetArgs([]string{"version"})
 
 		_ = cmd.Execute()
-		assert.Contains(t, b.String(), buildinfo.Version)
+		assert.Contains(t, b.String(), internal.Version)
 	})
 }

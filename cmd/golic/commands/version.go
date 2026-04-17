@@ -19,7 +19,7 @@ limitations under the License.
 */
 
 import (
-	"github.com/Bugs5382/golic/internal/buildinfo"
+	"github.com/Bugs5382/golic/internal"
 	"github.com/spf13/cobra"
 )
 
@@ -30,7 +30,7 @@ func VersionCmd() *cobra.Command {
 		Short: "Print the version number of Golic",
 		Long:  "",
 		Run: func(cmd *cobra.Command, args []string) {
-			cmd.Println(buildinfo.Version)
+			cmd.Println(internal.Version)
 		},
 	}
 	return versionCmd

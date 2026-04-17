@@ -1,4 +1,4 @@
-package buildinfo
+package internal
 
 /*
 Apache License 2.0
