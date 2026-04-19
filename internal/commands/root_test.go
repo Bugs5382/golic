@@ -1,9 +1,9 @@
-package golic
+package commands
 
 /*
 Apache License 2.0
 
-Copyright 2026 Shane
+Copyright 2026 Shane & Contributors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,24 +19,34 @@ limitations under the License.
 */
 
 import (
+	"bytes"
 	"os"
-	"path/filepath"
+	"testing"
+
+	"github.com/Bugs5382/golic/internal"
+	"github.com/rs/zerolog"
+	"github.com/stretchr/testify/assert"
 )
 
-func GetProjectRoot() string {
-	dir, err := os.Getwd()
-	if err != nil {
-		return "."
-	}
-	for {
-		if _, err := os.Stat(filepath.Join(dir, "go.mod")); err == nil {
-			return dir
-		}
-		parent := filepath.Dir(dir)
-		if parent == dir { // Reached the system root
-			break
-		}
-		dir = parent
-	}
-	return "."
+func TestRoot(t *testing.T) {
+	_ = os.Chdir(internal.GetProjectRoot())
+
+	zerolog.SetGlobalLevel(zerolog.Disabled)
+
+	t.Parallel()
+
+	t.Run("root no args passed", func(t *testing.T) {
+		cmd := RootCmd()
+
+		b := new(bytes.Buffer)
+
+		cmd.SetOut(b)
+		cmd.SetErr(b)
+
+		cmd.SetArgs([]string{})
+
+		err := cmd.Execute()
+		assert.ErrorContains(t, err, "no arguments passed")
+	})
+
 }

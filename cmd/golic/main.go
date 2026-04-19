@@ -3,7 +3,7 @@ package main
 /*
 Apache License 2.0
 
-Copyright 2026 Shane
+Copyright 2026 Shane & Contributors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -22,8 +22,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Bugs5382/golic/cmd/golic/commands"
-	"github.com/Bugs5382/golic/cmd/golic/logging"
+	"github.com/Bugs5382/golic/internal/commands"
+	"github.com/Bugs5382/golic/internal/logging"
 	"github.com/enescakir/emoji"
 )
 

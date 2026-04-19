@@ -3,7 +3,7 @@ package commands
 /*
 Apache License 2.0
 
-Copyright 2026 Shane
+Copyright 2026 Shane & Contributors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -23,19 +23,20 @@ import (
 	"os"
 	"testing"
 
-	"github.com/Bugs5382/golic"
+	"github.com/Bugs5382/golic/internal"
+	"github.com/Bugs5382/golic/internal/build"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestRoot(t *testing.T) {
-	_ = os.Chdir(golic.GetProjectRoot())
+func TestVersion(t *testing.T) {
+	_ = os.Chdir(internal.GetProjectRoot())
 
 	zerolog.SetGlobalLevel(zerolog.Disabled)
 
 	t.Parallel()
 
-	t.Run("root no args passed", func(t *testing.T) {
+	t.Run("get version", func(t *testing.T) {
 		cmd := RootCmd()
 
 		b := new(bytes.Buffer)
@@ -43,10 +44,9 @@ func TestRoot(t *testing.T) {
 		cmd.SetOut(b)
 		cmd.SetErr(b)
 
-		cmd.SetArgs([]string{})
+		cmd.SetArgs([]string{"version"})
 
-		err := cmd.Execute()
-		assert.ErrorContains(t, err, "no arguments passed")
+		_ = cmd.Execute()
+		assert.Contains(t, b.String(), build.Version+"."+build.Gitsha)
 	})
-
 }

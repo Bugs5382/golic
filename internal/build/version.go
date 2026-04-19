@@ -1,9 +1,9 @@
-package commands
+package build
 
 /*
 Apache License 2.0
 
-Copyright 2026 Shane
+Copyright 2026 Shane & Contributors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,20 +18,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import (
-	"github.com/Bugs5382/golic/internal/buildinfo"
-	"github.com/spf13/cobra"
+var (
+	Version = "local"
+	Gitsha  = "Unknown"
 )
-
-// VersionCmd Show the Golic Version
-func VersionCmd() *cobra.Command {
-	var versionCmd = &cobra.Command{
-		Use:   "version",
-		Short: "Print the version number of Golic",
-		Long:  "",
-		Run: func(cmd *cobra.Command, args []string) {
-			cmd.Println(buildinfo.Version)
-		},
-	}
-	return versionCmd
-}

@@ -1,9 +1,9 @@
-package buildinfo
+package internal
 
 /*
 Apache License 2.0
 
-Copyright 2026 Shane
+Copyright 2026 Shane & Contributors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,4 +18,25 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-var Version = "local" // Can be overriden during build
+import (
+	"os"
+	"path/filepath"
+)
+
+func GetProjectRoot() string {
+	dir, err := os.Getwd()
+	if err != nil {
+		return "."
+	}
+	for {
+		if _, err := os.Stat(filepath.Join(dir, "go.mod")); err == nil {
+			return dir
+		}
+		parent := filepath.Dir(dir)
+		if parent == dir { // Reached the system root
+			break
+		}
+		dir = parent
+	}
+	return "."
+}

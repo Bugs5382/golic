@@ -1,0 +1,111 @@
+# Apache License 2.0
+#
+# Copyright 2026 Shane & Contributors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+version: '3'
+vars:
+  ARTIFACT_NAME: golic
+  VERSION: "v0.1.1"
+  GITSHA:
+    sh: git rev-parse --short HEAD 2>/dev/null || echo "unknown"
+  GOOS:
+    sh: go env GOOS
+  GOARCH:
+    sh: go env GOARCH
+  COMMON_LIC: "2026 Shane & Contributors"
+tasks:
+  default:
+    cmds:
+      - task: build
+  clean:
+    desc: Remove build artifacts
+    cmds:
+      - rm -rf bin/
+  build:
+    desc: Build the binary
+    sources:
+      - ./cmd/**/*.go
+      - ./impl/**/*.go
+      - ./internal/**/*.go
+    generates:
+      - bin/{{.ARTIFACT_NAME}}-{{.GOOS}}-{{.GOARCH}}
+    cmds:
+      - |
+        CGO_ENABLED=0 GOOS={{.GOOS}} GOARCH={{.GOARCH}} go build \
+        -o bin/{{.ARTIFACT_NAME}}-{{.GOOS}}-{{.GOARCH}} \
+        -ldflags "-X 'internal/build.Version={{.VERSION}}' -X 'internal/build.Gitsha={{.GITSHA}}'" \
+        ./cmd/golic
+      - chmod +x bin/{{.ARTIFACT_NAME}}-{{.GOOS}}-{{.GOARCH}}
+  test:
+    desc: Run tests
+    cmds:
+      - go test -v -tags=all -parallel 4 -timeout 2h ./...
+  lint-init:
+    desc: Install linting tools via Brew
+    cmds:
+      - brew install golangci-lint gitleaks yamllint
+      - go install golang.org/x/tools/cmd/goimports@latest
+  lint:
+    desc: Run all linters and formatters
+    deps: [license]
+    cmds:
+      - goimports -w ./
+      - golangci-lint run
+      - yamllint .
+      - gitleaks detect . --no-git --verbose --config=.gitleaks.toml
+  license:
+    desc: Dry run for license injection
+    env:
+      GOOS:
+        sh: go env GOOS
+      GOARCH:
+        sh: go env GOARCH
+    cmds:
+      - ./bin/golic-${GOOS}-${GOARCH} inject -c "{{.COMMON_LIC}}" -t apache2
+  license-dry:
+    desc: Dry run for license injection
+    env:
+      GOOS:
+        sh: go env GOOS
+      GOARCH:
+        sh: go env GOARCH
+    cmds:
+      - ./bin/golic-${GOOS}-${GOARCH} inject -c "{{.COMMON_LIC}}" -t apache2 -d
+  license-remove:
+    desc: Dry run for license remove
+    env:
+      GOOS:
+        sh: go env GOOS
+      GOARCH:
+        sh: go env GOARCH
+    cmds:
+      - ./bin/golic-${GOOS}-${GOARCH} remove -c "{{.COMMON_LIC}}" -t apache2
+  license-remove-dry:
+    desc: Dry run for license remove
+    env:
+      GOOS:
+        sh: go env GOOS
+      GOARCH:
+        sh: go env GOARCH
+    cmds:
+      - ./bin/golic-${GOOS}-${GOARCH} remove -c "{{.COMMON_LIC}}" -t apache2 -d
+  update-version:
+    desc: Updates the version variable in Taskfile.yml
+    vars:
+      NEW_VERSION: '{{.NEW_VERSION | default .VERSION_ENV | default "local"}}'
+    preconditions:
+      - sh: command -v yq
+        msg: "yq is not installed. Install it via 'brew install yq' or the GitHub Action."
+    cmds:
+      - yq -i '.vars.VERSION = "{{.NEW_VERSION}}"' "{{.TASKFILE_DIR}}/Taskfile.yaml"

@@ -2,7 +2,7 @@
 
 ## v0.1.1 - 2026-04-15
 
-#### What Changed 👀
+### What Changed 👀
 
 #### 🐛 Bug Fixes
 
@@ -14,7 +14,7 @@
 
 ## v0.1.0 - 2026-04-12
 
-#### What Changed 👀
+### What Changed 👀
 
 #### 🚀 Features
 
