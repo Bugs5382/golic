@@ -31,6 +31,9 @@ func TestMatchRule(t *testing.T) {
 			Licenses:   make(map[string]string),
 			MergeRules: false,
 			Rules: map[string]impl.Rule{
+				"Dockerfile*": {
+					Prefix: "#",
+				},
 				"Makefile": {
 					Prefix: "#",
 				},
@@ -55,6 +58,7 @@ func TestMatchRule(t *testing.T) {
 		wantRule string
 		wantOk   bool
 	}{
+		{name: "Match Any Extension", fileName: "Dockerfile", wantRule: "Dockerfile*", wantOk: true},
 		{name: "Direct Match (Exact)", fileName: "Makefile", wantRule: "Makefile", wantOk: true},
 		{name: "Recursive Match (Deep Path)", fileName: "charts/technitium/templates/service.yaml", wantRule: "**/templates/**/*.yaml", wantOk: true},
 		{name: "Wildcard Match (Shallow)", fileName: "main.go", wantRule: "*.go", wantOk: true},

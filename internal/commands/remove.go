@@ -27,23 +27,23 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func InjectCmd() *cobra.Command {
+func RemoveCmd() *cobra.Command {
 
 	opts := internal.Options{}
 
 	opts.MasterConfig = golic.DefaultConfig
 
 	// command
-	var injectCmd = &cobra.Command{
-		Use:   "inject",
-		Short: "Injects licenses",
+	var removeCmd = &cobra.Command{
+		Use:   "remove",
+		Short: "Remove licenses",
 		Long:  ``,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return setupAndValidate(cmd, &opts)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			// we are injecting!
-			opts.Type = 0
+			// we are removing!
+			opts.Type = 1
 
 			// go ahead and start the inject process!
 			i := impl.ProcessFile(cmd.Context(), opts)
@@ -62,19 +62,6 @@ func InjectCmd() *cobra.Command {
 	}
 
 	// flags
-	injectCmd.Flags().BoolVarP(&opts.ModifiedExitStatus, "modified-exit", "x", false,
-		"If enabled, exits with status 1 when any file is modified. The settings is used by CI")
-	injectCmd.Flags().BoolVarP(&opts.Dry, "dry", "d", false, "Dry run")
-
-	injectCmd.Flags().StringVarP(&opts.Template, "template", "t", "", "License key")
-	injectCmd.Flags().StringVarP(&opts.LicIgnore, "licignore", "l", ".licignore",
-		".licignore path")
-	injectCmd.Flags().StringVarP(&opts.Copyright, "copyright", "c",
-		fmt.Sprintf("%d %s", internal.Year, "[Insert Company]"), "Copyright holder and year for the license header")
-	injectCmd.Flags().StringVarP(&opts.ConfigPath, "config-path", "p", ".golic.yaml",
-		"Path to the local configuration overriding config-url")
-	//injectCmd.Flags().StringVarP(&opts.SearchPath, "include-only", "i", "",
-	//	"Used to execute only in reading into the path/directory provided")
-
-	return injectCmd
+	addCommonFlags(removeCmd, &opts)
+	return removeCmd
 }

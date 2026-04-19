@@ -22,8 +22,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Bugs5382/golic/cmd/golic/commands"
-	"github.com/Bugs5382/golic/cmd/golic/logging"
+	"github.com/Bugs5382/golic/internal/commands"
+	"github.com/Bugs5382/golic/internal/logging"
 	"github.com/enescakir/emoji"
 )
 

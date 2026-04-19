@@ -22,11 +22,8 @@ import (
 	_ "embed"
 	"fmt"
 
-	"github.com/Bugs5382/golic/impl"
 	"github.com/spf13/cobra"
 )
-
-var BaseConfig *impl.Config
 
 func RootCmd() *cobra.Command {
 	var verbose bool
