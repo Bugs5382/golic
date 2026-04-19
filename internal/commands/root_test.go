@@ -3,7 +3,7 @@ package commands
 /*
 Apache License 2.0
 
-Copyright 2026 Shane
+Copyright 2026 Shane & Contributors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -23,13 +23,13 @@ import (
 	"os"
 	"testing"
 
-	"github.com/Bugs5382/golic"
+	"github.com/Bugs5382/golic/internal"
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestRoot(t *testing.T) {
-	_ = os.Chdir(golic.GetProjectRoot())
+	_ = os.Chdir(internal.GetProjectRoot())
 
 	zerolog.SetGlobalLevel(zerolog.Disabled)
 

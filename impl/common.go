@@ -3,7 +3,7 @@ package impl
 /*
 Apache License 2.0
 
-Copyright 2026 Shane
+Copyright 2026 Shane & Contributors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import (
 
 	"github.com/Bugs5382/golic"
 	"github.com/Bugs5382/golic/internal"
-	"github.com/Bugs5382/golic/pkg"
 	"github.com/denormal/go-gitignore"
 	"github.com/enescakir/emoji"
 	"github.com/goccy/go-yaml"
@@ -320,7 +319,7 @@ func splitSource(source string, rules []string) (header, footer string) {
 
 func findHeaderAndFooter(lines []string, match string) (header, footer string) {
 	for i, l := range lines {
-		if pkg.IsMatch(l, match) {
+		if internal.IsMatch(l, match) {
 			header = strings.Join(lines[0:i+1], "\n")
 			footer = strings.Join(lines[i+1:], "\n")
 			return
@@ -342,7 +341,7 @@ func getRule(config *Config, path string) (rule string) {
 
 	cleanPath := filepath.ToSlash(path)
 	for _, k := range keys {
-		if pkg.IsMatch(cleanPath, k) {
+		if internal.IsMatch(cleanPath, k) {
 			return k
 		}
 	}

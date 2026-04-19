@@ -1,9 +1,9 @@
-package pkg_test
+package internal_test
 
 /*
 Apache License 2.0
 
-Copyright 2026 Shane
+Copyright 2026 Shane & Contributors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import (
 	"testing"
 
 	"github.com/Bugs5382/golic/impl"
-	"github.com/Bugs5382/golic/pkg"
+	"github.com/Bugs5382/golic/internal"
 )
 
 func TestMatchRule(t *testing.T) {
@@ -73,7 +73,7 @@ func TestMatchRule(t *testing.T) {
 			var gotOk bool
 
 			for pattern := range config.Golic.Rules {
-				if pkg.IsMatch(tt.fileName, pattern) {
+				if internal.IsMatch(tt.fileName, pattern) {
 					// Precedence Logic: If we find multiple matches,
 					// we usually want the most specific (longest) pattern.
 					if len(pattern) > len(gotRule) {

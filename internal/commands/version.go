@@ -3,7 +3,7 @@ package commands
 /*
 Apache License 2.0
 
-Copyright 2026 Shane
+Copyright 2026 Shane & Contributors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ limitations under the License.
 */
 
 import (
-	"github.com/Bugs5382/golic/internal"
+	"github.com/Bugs5382/golic/internal/build"
 	"github.com/spf13/cobra"
 )
 
@@ -27,10 +27,10 @@ import (
 func VersionCmd() *cobra.Command {
 	var versionCmd = &cobra.Command{
 		Use:   "version",
-		Short: "Print the version number of Golic",
+		Short: "Print the version number of Golic with GIT SHA",
 		Long:  "",
 		Run: func(cmd *cobra.Command, args []string) {
-			cmd.Println(internal.Version)
+			cmd.Println(build.Version + "." + build.Gitsha)
 		},
 	}
 	return versionCmd

@@ -1,6 +1,6 @@
 # Apache License 2.0
 #
-# Copyright 2026 Shane
+# Copyright 2026 Shane & Contributors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install Go
+      - name: Setup Go
         uses: actions/setup-go@v5
         with:
           go-version-file: ./go.mod
@@ -42,4 +42,4 @@ jobs:
         run: go mod download
 
       - name: Test
-        run: make test
+        run: task test
