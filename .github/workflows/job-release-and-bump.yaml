@@ -72,16 +72,17 @@ jobs:
           task update-version NEW_VERSION=v${{ steps.drafter.outputs.resolved_version }}
 
       - name: 📤 Changelog Action
-        uses: Bugs5382/changelog-updater-action@v0.3.1
+        uses: Bugs5382/changelog-updater-action@v0.3.2
         env:
+          LOG_LEVEL: debug
+          LOG_FORMAT: text
           RELEASE_NOTES: >-
             ${{ steps.drafter.outputs.body }}
           RELEASE_VERSION: v${{ steps.drafter.outputs.resolved_version }}
         with:
-          notes: "$RELEASE_NOTES"
-          tag: "$RELEASE_VERSION"
+          tag: ${{ env.RELEASE_VERSION }}
+          notes: ${{ env.RELEASE_NOTES }}
           diff: 'true'
-          path: ''
 
       - name: Commit and Push Version Update
         uses: stefanzweifel/git-auto-commit-action@v4
@@ -111,17 +112,21 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version-file: ./go.mod
-
-      - name: Install Task
-        uses: arduino/setup-task@v2
-        with:
-          version: 3.x
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          go-version: '1.26.x'
+          cache: true
 
       - name: Build Binary
-        run: task build GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }}
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: 0
+        run: |
+          BINARY_NAME="bin/golic-${{ matrix.goos }}-${{ matrix.goarch }}"
+          if [ "${{ matrix.goos }}" = "windows" ]; then BINARY_NAME="${BINARY_NAME}.exe"; fi
+          go build -v \
+            -o "$BINARY_NAME" \
+            -ldflags "-s -w -X 'internal/build.Version=${{ github.event.release.tag_name }}' -X 'internal/build.Gitsha=${{ github.sha }}' -extldflags '-static'" \
+            ./cmd/golic
 
       - name: Upload Binary to Release
         uses: softprops/action-gh-release@v2
