@@ -1,5 +1,21 @@
 # Golic Change Log
 
+## v0.2.0 - 2026-04-20
+
+### What Changed 👀
+
+#### 🚀 Features
+
+- fix: invalidate v0.1.1 @Bugs5382 (#17)
+
+#### 🐛 Bug Fixes
+
+- fix: invalidate v0.1.1 @Bugs5382 (#17)
+
+### Extra
+
+**Full Changelog**: https://github.com/Bugs5382/golic/compare/v0.1.1...v0.2.0
+
 ## v0.1.1 - 2026-04-15
 
 ### What Changed 👀

@@ -16,7 +16,7 @@
 version: '3'
 vars:
   ARTIFACT_NAME: golic
-  VERSION: "v0.1.1"
+  VERSION: "v0.2.0"
   GITSHA:
     sh: git rev-parse --short HEAD 2>/dev/null || echo "unknown"
   GOOS:
