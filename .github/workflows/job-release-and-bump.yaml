@@ -81,6 +81,7 @@ jobs:
           notes: "$RELEASE_NOTES"
           tag: "$RELEASE_VERSION"
           diff: 'true'
+          path: '/'
 
       - name: Commit and Push Version Update
         uses: stefanzweifel/git-auto-commit-action@v4
