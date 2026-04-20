@@ -27,3 +27,4 @@ require (
 
 
 retract v0.1.1 // build issue from source -- not the binary releases
+retract v0.1.0 // build issue from source -- not the binary releases
