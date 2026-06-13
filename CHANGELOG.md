@@ -10,6 +10,10 @@
 - feat: build releases with GoReleaser @Bugs5382 (#24)
 - feat: add built-in license-header rules for TypeScript sources @Bugs5382 (#23)
 
+#### 📄 Documentation
+
+- docs: document the replace command and built-in TypeScript rules @Bugs5382 (#27)
+
 ### Extra
 
 **Full Changelog**: https://github.com/Bugs5382/golic/compare/v0.2.0...v0.3.0
