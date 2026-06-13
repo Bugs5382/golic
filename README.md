@@ -47,6 +47,8 @@ Determines which files Golic should touch. It uses standard `.gitignore` syntax.
 
 Contains license text and formatting rules. Golic merges your local file with its [embedded master configuration](.golic.yaml) by default.
 
+Comment rules for common languages are **built in** — including Go, YAML, shell, and TypeScript/JavaScript (`.ts`, `.tsx`, `.mts`, `.cts`, `.js`, `.jsx`, `.mjs`, `.cjs`, which use a `/* … */` block). You only need a local `rules:` entry for unusual file types or to override a built-in. Which files are processed is controlled separately by `.licignore`, so to stamp TypeScript sources you just allow them there (e.g. `!*.ts`).
+
 ```yaml
 # .golic.yaml 
 golic:
@@ -81,11 +83,21 @@ golic inject -t apacheX
 
 ### 🔄 Updating or Removing
 
-To update a license, you must remove the old one first:
+**Update in one pass** with `replace` — it strips the existing license header and injects the configured one, so you can change the copyright holder, year, or license type without a separate remove step:
 
-1.  **Remove:** `golic remove -t apacheX`
-2.  **Update:** Modify `.golic.yaml`
-3.  **Re-inject:** `golic inject -t apacheX`
+```bash
+# Preview first, then apply
+golic replace -c "2026 MyCompany ltd." -t apacheX --dry
+golic replace -c "2026 MyCompany ltd." -t apacheX
+```
+
+`replace` is a no-op when a file already carries the exact target header, and honors `--dry` and `-x` like `inject`.
+
+**Remove** headers entirely with:
+
+```bash
+golic remove -t apacheX
+```
 
 ### 🤖 CI/CD Integration
 
@@ -142,6 +154,7 @@ make test
 | Command | Description |
 | :--- | :--- |
 | `inject` | Injects license headers based on templates. |
+| `replace` | Replaces an existing header with the configured one in a single pass. |
 | `remove` | Removes license headers matching the config. |
 | `version` | Prints current version. |
 
