@@ -23,8 +23,9 @@ import "time"
 type LicenseCommandType int
 
 const (
-	LicenseInject LicenseCommandType = 0
-	LicenseRemove LicenseCommandType = 1
+	LicenseInject  LicenseCommandType = 0
+	LicenseRemove  LicenseCommandType = 1
+	LicenseReplace LicenseCommandType = 2
 )
 
 type Options struct {

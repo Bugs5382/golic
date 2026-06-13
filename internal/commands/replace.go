@@ -1,0 +1,67 @@
+package commands
+
+/*
+Apache License 2.0
+
+Copyright 2026 Shane & Contributors
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+import (
+	"fmt"
+
+	"github.com/Bugs5382/golic"
+	"github.com/Bugs5382/golic/impl"
+	"github.com/Bugs5382/golic/internal"
+	"github.com/spf13/cobra"
+)
+
+func ReplaceCmd() *cobra.Command {
+
+	opts := internal.Options{}
+
+	opts.MasterConfig = golic.DefaultConfig
+
+	// command
+	var replaceCmd = &cobra.Command{
+		Use:   "replace",
+		Short: "Replace licenses",
+		Long:  `Remove the existing license header and inject the configured one in a single pass.`,
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			return setupAndValidate(cmd, &opts)
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			// we are replacing!
+			opts.Type = internal.LicenseReplace
+
+			// go ahead and start the replace process!
+			i := impl.ProcessFile(cmd.Context(), opts)
+			exitCode, err := internal.Command(i).MustRun()
+
+			if err != nil {
+				return err
+			}
+
+			if exitCode != 0 {
+				return fmt.Errorf("something went wrong")
+			}
+
+			return nil
+		},
+	}
+
+	// flags
+	addCommonFlags(replaceCmd, &opts)
+	return replaceCmd
+}
