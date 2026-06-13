@@ -269,6 +269,27 @@ golic:
     .js:
       prefix: "/*"
       suffix: "*/"
+    .jsx:
+      prefix: "/*"
+      suffix: "*/"
+    .mjs:
+      prefix: "/*"
+      suffix: "*/"
+    .cjs:
+      prefix: "/*"
+      suffix: "*/"
+    .ts:
+      prefix: "/*"
+      suffix: "*/"
+    .tsx:
+      prefix: "/*"
+      suffix: "*/"
+    .mts:
+      prefix: "/*"
+      suffix: "*/"
+    .cts:
+      prefix: "/*"
+      suffix: "*/"
     .css:
       prefix: "/*"
       suffix: "*/"
