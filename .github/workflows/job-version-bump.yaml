@@ -114,22 +114,11 @@ jobs:
     name: 📦 Build & Attach Binaries
     if: github.event_name == 'release'
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          - goos: linux
-            goarch: amd64
-          - goos: linux
-            goarch: arm64
-          - goos: darwin
-            goarch: amd64
-          - goos: darwin
-            goarch: arm64
-          - goos: windows
-            goarch: amd64
     steps:
       - name: Checkout Code
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       - name: Setup Go
         uses: actions/setup-go@v5
@@ -137,22 +126,12 @@ jobs:
           go-version-file: ./go.mod
           cache: true
 
-      - name: Build Binary
-        env:
-          GOOS: ${{ matrix.goos }}
-          GOARCH: ${{ matrix.goarch }}
-          CGO_ENABLED: 0
-        run: |
-          BINARY_NAME="bin/golic-${{ matrix.goos }}-${{ matrix.goarch }}"
-          if [ "${{ matrix.goos }}" = "windows" ]; then BINARY_NAME="${BINARY_NAME}.exe"; fi
-          go build -v \
-            -o "$BINARY_NAME" \
-            -ldflags "-s -w -X 'internal/build.Version=${{ github.event.release.tag_name }}' -X 'internal/build.Gitsha=${{ github.sha }}' -extldflags '-static'" \
-            ./cmd/golic
-
-      - name: Upload Binary to Release
-        uses: softprops/action-gh-release@v2
+      - name: Release via GoReleaser
+        uses: goreleaser/goreleaser-action@v6
         with:
-          files: bin/*
+          args: -p 3 release --clean --timeout 60m0s
+          version: '~> v2'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CI_COMMIT_SHA: ${{ github.sha }}
+          CI_COMMIT_TAG: ${{ github.event.release.tag_name }}
