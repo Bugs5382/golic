@@ -79,6 +79,119 @@ func removeFile(path string, o internal.Options, config *Config) (rule string, s
 	return rule, true, nil
 }
 
+// replaceFile Remove any existing license header and inject the current one in a
+// single pass. Unlike inject, replace strips whatever license-style comment block
+// already sits in the header region so the copyright string or license type can be
+// changed, not just refreshed in place. When the file already carries the exact
+// license, it is left untouched and reported as skipped so a no-op replace does not
+// count as a change.
+func replaceFile(path string, o internal.Options, config *Config) (rule string, skip bool, err error) {
+	source, err := read(path)
+	if err != nil {
+		return "", false, err
+	}
+	rule = getRule(config, path)
+	license, err := getCommentedLicense(config, o, rule)
+	if err != nil {
+		return rule, false, err
+	}
+
+	// Already stamped with the current license; nothing to replace.
+	if strings.Contains(source, license) {
+		return rule, true, nil
+	}
+
+	r := config.Golic.Rules[rule]
+
+	// Split the file into the part that precedes the license region and the rest.
+	header, footer := splitSource(source, r.Under)
+	if header != "" {
+		header = header + "\n"
+	}
+
+	// Drop an existing license block from the front of the license region before
+	// injecting the new one. Normalize the leading newlines of what remains so the
+	// spacing matches a fresh inject regardless of how the old block was laid out.
+	footer = stripLicenseBlock(footer, r)
+	if header != "" && footer != "" {
+		// The license sits below an "under" line (e.g. package). Inject leaves a
+		// single newline between the license and the body; mirror that here.
+		footer = "\n" + strings.TrimLeft(footer, "\n")
+	} else if header == "" {
+		// The license sits at the very top of the file; drop any blank lines the
+		// removed block left behind so the body starts cleanly after the license.
+		footer = strings.TrimLeft(footer, "\n")
+	}
+
+	updated := fmt.Sprintf("%s%s%s", header, license, footer)
+
+	// Nothing actually changed (e.g. an unstamped file already matches output).
+	if updated == source {
+		return rule, true, nil
+	}
+
+	if !o.Dry {
+		err = os.WriteFile(path, []byte(updated), os.ModeExclusive)
+	}
+	return rule, false, err
+}
+
+// stripLicenseBlock removes a leading license-style comment block from text using
+// the comment delimiters of the given rule. Wrapped rules (with a suffix) are
+// matched from their opening delimiter to the first closing delimiter; line-comment
+// rules drop the contiguous run of prefixed lines. Leading blank lines are tolerated
+// so the detection survives the blank line inject leaves between header and license.
+func stripLicenseBlock(text string, r Rule) string {
+	prefix := strings.TrimLeft(r.Prefix, "\n")
+
+	// Preserve any leading blank lines, then inspect the first non-blank line.
+	rest := text
+	lead := ""
+	for {
+		nl := strings.IndexByte(rest, '\n')
+		if nl == -1 {
+			break
+		}
+		if strings.TrimSpace(rest[:nl]) != "" {
+			break
+		}
+		lead += rest[:nl+1]
+		rest = rest[nl+1:]
+	}
+
+	trimmedPrefix := strings.TrimSpace(prefix)
+	if trimmedPrefix == "" || !strings.HasPrefix(strings.TrimSpace(rest), trimmedPrefix) {
+		// No recognizable license block at the front; leave the text untouched.
+		return text
+	}
+
+	if r.Suffix != "" {
+		// Wrapped block: cut from the opener through the first closing delimiter.
+		suffix := strings.TrimSpace(r.Suffix)
+		idx := strings.Index(rest, suffix)
+		if idx == -1 {
+			return text
+		}
+		after := rest[idx+len(suffix):]
+		after = strings.TrimPrefix(after, "\n")
+		return lead + after
+	}
+
+	// Line-comment block: drop the contiguous run of prefixed lines.
+	lines := strings.Split(rest, "\n")
+	cut := 0
+	for _, l := range lines {
+		if strings.HasPrefix(strings.TrimSpace(l), trimmedPrefix) {
+			cut++
+			continue
+		}
+		break
+	}
+	remaining := strings.Join(lines[cut:], "\n")
+	remaining = strings.TrimPrefix(remaining, "\n")
+	return lead + remaining
+}
+
 // readCommonConfig Read the commong/master config
 func (u *Process) readCommonConfig() (*Config, error) {
 	c := &Config{}
@@ -232,6 +345,8 @@ func processUpdate(path string, o internal.Options, config *Config) (rule string
 		return injectFile(path, o, config)
 	case internal.LicenseRemove:
 		return removeFile(path, o, config)
+	case internal.LicenseReplace:
+		return replaceFile(path, o, config)
 	}
 	return "", true, fmt.Errorf("invalid license type")
 }

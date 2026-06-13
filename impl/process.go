@@ -99,6 +99,8 @@ func (u *Process) String() string {
 		return aurora.BrightCyan("inject").String()
 	case internal.LicenseRemove:
 		return aurora.BrightCyan("remove").String()
+	case internal.LicenseReplace:
+		return aurora.BrightCyan("replace").String()
 	}
 	return aurora.BrightRed("ERROR, unrecognised command").String()
 }
