@@ -1,5 +1,19 @@
 # Golic Change Log
 
+## v0.3.0 - 2026-06-13
+
+### What Changed 👀
+
+#### 🚀 Features
+
+- feat: add a replace command to update license headers @Bugs5382 (#25)
+- feat: build releases with GoReleaser @Bugs5382 (#24)
+- feat: add built-in license-header rules for TypeScript sources @Bugs5382 (#23)
+
+### Extra
+
+**Full Changelog**: https://github.com/Bugs5382/golic/compare/v0.2.0...v0.3.0
+
 ## v0.2.0 - 2026-04-20
 
 ### What Changed 👀
