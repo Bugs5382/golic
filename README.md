@@ -1,6 +1,6 @@
-# 🚀 Golic
+# Golic 🚀
 
-> **A declarative tool for injecting and managing license headers in source code.**
+> 📜 **A declarative tool for injecting and managing license headers in source code.**
 
 Golic automates the tedious task of ensuring every source file in your project has the correct license header. It’s built for developers who want a "set it and forget it" solution for compliance.
 
@@ -70,7 +70,7 @@ golic:
 
 ## 🛠️ Usage
 
-### 💉 Injecting Licenses
+### Injecting Licenses
 
 Once your config is ready, run:
 
@@ -78,10 +78,10 @@ Once your config is ready, run:
 golic inject -t apacheX
 ```
 
-> [\!TIP]
+> [!TIP]
 > Always use the `--dry` flag first to see a preview of which files will be modified without actually changing them.
 
-### 🔄 Updating or Removing
+### Updating or Removing
 
 **Update in one pass** with `replace` — it strips the existing license header and injects the configured one, so you can change the copyright holder, year, or license type without a separate remove step:
 
@@ -99,7 +99,7 @@ golic replace -c "2026 MyCompany ltd." -t apacheX
 golic remove -t apacheX
 ```
 
-### 🤖 CI/CD Integration
+### CI/CD Integration
 
 To fail a build if licenses are missing (e.g., a developer forgot to run Golic), use the `-x` (exit code) flag:
 
@@ -109,7 +109,7 @@ golic inject --dry -x -t apache2
 
 ## 🏗 Development
 
-### 🛠 Build
+### Build
 
 To compile the project locally, execute:
 
@@ -141,7 +141,7 @@ To verify only the project licenses, use:
 make license
 ```
 
-### 🧪 Test
+### Test
 
 To execute the unit testing suite, run:
 
@@ -169,9 +169,9 @@ make test
 
 We welcome Pull Requests! Please follow these steps:
 
-* **✅ Validation:** Run `make lint` to verify code quality.
-* **🧪 Testing:** New features must include unit tests.
-* **✍️ Security:** All commits must be **signed** (GPG/SSH).
+* ✅ **Validation:** Run `make lint` to verify code quality.
+* 🧪 **Testing:** New features must include unit tests.
+* ✍️ **Security:** All commits must be **signed** (GPG/SSH).
 
 ## ❤️ Acknowledgments
 
