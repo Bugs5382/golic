@@ -361,8 +361,13 @@ func displaySummary(skipped, visited int) {
 
 // read File
 func read(f string) (s string, err error) {
-	content, err := os.ReadFile(f)
+	log.Trace().Str("path", f).Msg("reading source file")
+	// The path comes from golic's own walk of the working tree, filtered by
+	// .licignore. Reading the files the user asked golic to process is the
+	// point of the tool, so this is not untrusted input (#34).
+	content, err := os.ReadFile(f) // #nosec G304 -- path comes from the working-tree walk
 	if err != nil {
+		log.Debug().Err(err).Str("path", f).Msg("reading source file failed")
 		return
 	}
 	// Convert []byte to string and print to screen
