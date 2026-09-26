@@ -6,6 +6,7 @@
 
 #### 📄 Documentation
 
+- docs(readme): use the Taskfile commands instead of make @Bugs5382 (#33)
 - docs(readme): apply the lite emoji treatment @Bugs5382 (#30)
 
 ### Extra
