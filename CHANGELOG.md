@@ -1,5 +1,22 @@
 # Golic Change Log
 
+## v1.0.0 - 2026-09-26
+
+### What Changed 👀
+
+#### 💥 Breaking Changes
+
+- refactor!: internalize the library packages and fix version reporting @Bugs5382 (#37)
+
+#### 📄 Documentation
+
+- docs(readme): use the Taskfile commands instead of make @Bugs5382 (#33)
+- docs(readme): apply the lite emoji treatment @Bugs5382 (#30)
+
+### Extra
+
+**Full Changelog**: https://github.com/Bugs5382/golic/compare/v0.3.0...v1.0.0
+
 ## v0.3.1 - 2026-09-26
 
 ### What Changed 👀
