@@ -109,44 +109,54 @@ golic inject --dry -x -t apache2
 
 ## 🏗 Development
 
+The project uses [Task](https://taskfile.dev) (`Taskfile.yaml`). Run `task --list` to see every target.
+
 ### Build
 
 To compile the project locally, execute:
 
 ```bash
-make build
+task build
 ```
+
+The binary lands in `bin/golic-<os>-<arch>`.
 
 To remove build artifacts and clean your workspace:
 
 ```bash
-make clean
+task clean
 ```
 
 If you are **contributing** to this project, you must first initialize the linting environment:
- ```bash
- make lint-init
- ```
+
+```bash
+task lint-init
+```
+
 This command installs all necessary dependencies and tools for code analysis.
 
 Once initialized, you can analyze the codebase by running:
 
 ```bash
-make lint
+task lint
 ```
 
-To verify only the project licenses, use:
+`task lint` stamps missing license headers first, using the binary from `task build`.
+
+To verify only the project licenses without changing any files, use:
 
 ```bash
-make license
+task license-dry
 ```
+
+To add any missing headers, run `task license`.
 
 ### Test
 
 To execute the unit testing suite, run:
 
 ```bash
-make test
+task test
 ```
 
 ## 📋 Command Reference
@@ -169,7 +179,7 @@ make test
 
 We welcome Pull Requests! Please follow these steps:
 
-* ✅ **Validation:** Run `make lint` to verify code quality.
+* ✅ **Validation:** Run `task lint` to verify code quality.
 * 🧪 **Testing:** New features must include unit tests.
 * ✍️ **Security:** All commits must be **signed** (GPG/SSH).
 
