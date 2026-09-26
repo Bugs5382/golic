@@ -21,8 +21,8 @@ limitations under the License.
 import (
 	"testing"
 
-	"github.com/Bugs5382/golic/impl"
 	"github.com/Bugs5382/golic/internal"
+	"github.com/Bugs5382/golic/internal/impl"
 )
 
 func TestMatchRule(t *testing.T) {

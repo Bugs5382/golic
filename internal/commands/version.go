@@ -19,18 +19,20 @@ limitations under the License.
 */
 
 import (
+	"fmt"
+
 	"github.com/Bugs5382/golic/internal/build"
 	"github.com/spf13/cobra"
 )
 
-// VersionCmd Show the Golic Version
 func VersionCmd() *cobra.Command {
 	var versionCmd = &cobra.Command{
 		Use:   "version",
-		Short: "Print the version number of Golic with GIT SHA",
+		Short: "Print the golic version and, when known, the commit",
 		Long:  "",
-		Run: func(cmd *cobra.Command, args []string) {
-			cmd.Println(build.Version + "." + build.Gitsha)
+		RunE: func(cmd *cobra.Command, args []string) error {
+			_, err := fmt.Fprint(cmd.OutOrStdout(), build.String())
+			return err
 		},
 	}
 	return versionCmd

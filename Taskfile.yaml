@@ -36,7 +36,6 @@ tasks:
     desc: Build the binary
     sources:
       - ./cmd/**/*.go
-      - ./impl/**/*.go
       - ./internal/**/*.go
     generates:
       - bin/{{.ARTIFACT_NAME}}-{{.GOOS}}-{{.GOARCH}}
@@ -44,7 +43,7 @@ tasks:
       - |
         CGO_ENABLED=0 GOOS={{.GOOS}} GOARCH={{.GOARCH}} go build \
         -o bin/{{.ARTIFACT_NAME}}-{{.GOOS}}-{{.GOARCH}} \
-        -ldflags "-X 'internal/build.Version={{.VERSION}}' -X 'internal/build.Gitsha={{.GITSHA}}'" \
+        -ldflags "-X 'github.com/Bugs5382/golic/internal/build.Version={{.VERSION}}' -X 'github.com/Bugs5382/golic/internal/build.Gitsha={{.GITSHA}}'" \
         ./cmd/golic
       - chmod +x bin/{{.ARTIFACT_NAME}}-{{.GOOS}}-{{.GOARCH}}
   test:

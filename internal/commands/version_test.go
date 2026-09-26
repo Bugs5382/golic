@@ -42,11 +42,11 @@ func TestVersion(t *testing.T) {
 		b := new(bytes.Buffer)
 
 		cmd.SetOut(b)
-		cmd.SetErr(b)
+		cmd.SetErr(new(bytes.Buffer))
 
 		cmd.SetArgs([]string{"version"})
 
-		_ = cmd.Execute()
-		assert.Contains(t, b.String(), build.Version+"."+build.Gitsha)
+		assert.NoError(t, cmd.Execute())
+		assert.Equal(t, build.String(), b.String())
 	})
 }

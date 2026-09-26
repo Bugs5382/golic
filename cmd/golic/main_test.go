@@ -19,9 +19,38 @@ limitations under the License.
 */
 
 import (
+	"os/exec"
+	"path/filepath"
 	"testing"
 )
 
 func TestRootCmdErrorMessage(t *testing.T) {
 
+}
+
+// TestVersionLdflags builds the binary the way `task build` and GoReleaser do
+// and checks that `golic version` prints the stamped values.
+func TestVersionLdflags(t *testing.T) {
+	if testing.Short() {
+		t.Skip("builds the binary")
+	}
+
+	bin := filepath.Join(t.TempDir(), "golic")
+	ldflags := "-X 'github.com/Bugs5382/golic/internal/build.Version=v9.8.7' " +
+		"-X 'github.com/Bugs5382/golic/internal/build.Gitsha=abc1234'"
+
+	// #nosec G204 -- fixed arguments, test only
+	build := exec.Command("go", "build", "-o", bin, "-ldflags", ldflags, ".")
+	build.Env = append(build.Environ(), "CGO_ENABLED=0")
+	if out, err := build.CombinedOutput(); err != nil {
+		t.Fatalf("go build failed: %v\n%s", err, out)
+	}
+
+	out, err := exec.Command(bin, "version").Output() // #nosec G204 -- binary built above
+	if err != nil {
+		t.Fatalf("golic version failed: %v", err)
+	}
+	if got, want := string(out), "v9.8.7\ncommit abc1234\n"; got != want {
+		t.Fatalf("golic version = %q, want %q", got, want)
+	}
 }

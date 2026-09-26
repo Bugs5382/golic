@@ -25,7 +25,6 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/Bugs5382/golic"
 	"github.com/Bugs5382/golic/internal"
 	"github.com/denormal/go-gitignore"
 	"github.com/enescakir/emoji"
@@ -195,7 +194,7 @@ func stripLicenseBlock(text string, r Rule) string {
 // readCommonConfig Read the commong/master config
 func (u *Process) readCommonConfig() (*Config, error) {
 	c := &Config{}
-	rawYaml := golic.DefaultConfig
+	rawYaml := defaultConfig
 
 	if err := yaml.Unmarshal([]byte(rawYaml), c); err != nil {
 		return nil, fmt.Errorf("failed to parse master config: %w", err)
