@@ -31,4 +31,4 @@ rules:
   truthy: disable
 
 ignore:
-  - ".golic.yaml"
+  - "internal/impl/default.golic.yaml"

@@ -5,36 +5,38 @@ hook-enforced rules). Keep this file current when the build, layout, or public A
 
 ## What this is
 
-GoLic, injects license into source code files
-
-<!-- Fill in: what the project does, what it ships (library, service, action, CLI), and the one or
-two things an agent must understand before changing it. -->
+golic is a CLI that injects, replaces and removes license headers in source files. It ships as a
+binary (`go install github.com/Bugs5382/golic/cmd/golic@<version>` or the GoReleaser archives).
+There is no library API: everything except `cmd/golic` lives under `internal/`.
 
 ## Using golic
 
-<!-- If this project is consumed by others (a library/plugin/action), describe the contract a
-consumer must respect: the single entry point, the public surface, required options, and anything
-that must not be bypassed. Delete this section for a leaf application. -->
+The contract is the CLI: the `inject`, `replace`, `remove` and `version` commands, their flags, the
+`.golic.yaml` and `.licignore` formats, the `{{copyright}}` placeholder and the exit codes. The
+hub's shared `job-golic` runs `golic inject --dry -x` and relies on a non-zero exit when headers are
+missing, so treat any change there as breaking.
 
 ## Layout
 
-<!-- The directories that matter and what lives in each. Keep it short; point at the entry points. -->
-
-- `src/` - <what>
-- `<tests dir>/` - <what>
+- `cmd/golic/` - `main`, the process entry point.
+- `internal/commands/` - the cobra commands and their flags.
+- `internal/impl/` - the file walk, header rendering, config merge, and the embedded default
+  ruleset (`default.golic.yaml`).
+- `internal/build/` - version reporting: linker values first, then `runtime/debug.ReadBuildInfo`.
+- `internal/` - options, glob matching, the service runner; `internal/logging/` sets up zerolog.
 
 ## Build, test, lint
 
-<!-- The exact commands. Pull these from package.json scripts (npm), the Taskfile (Go/Task), or
-pyproject (Python) so they stay accurate. -->
-
-- Build: `<command>`
-- Test: `<command>` (note any service/fixture the integration tests require)
-- Lint: `<command>`
-- License headers / docs: `<command>`
+- Build: `task build` (stamps `internal/build.Version` and `Gitsha` through `-ldflags`), or
+  `CGO_ENABLED=0 go build ./...`.
+- Test: `task test`, or `go test -race ./...`.
+- Lint: `task lint` (goimports, golangci-lint, yamllint, gitleaks).
+- License headers: `task license-dry` checks, `task license` stamps (both need `task build` first).
 
 ## Conventions and gotchas
 
 - See `CLAUDE.md` for the branch/commit/PR rules; they are enforced by the git hooks in
   `.claude/hooks` (run `bash .claude/hooks/install.sh` once per clone).
-- <project-specific conventions, non-obvious constraints, and traps an agent should know>
+- golic builds itself for its license check (`job-go-lic.yaml`); it does not use the hub's shared
+  `job-golic`.
+- The Release Manager rewrites the Taskfile `VERSION` and `CHANGELOG.md` on `main`. Leave both to it.

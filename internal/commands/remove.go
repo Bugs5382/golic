@@ -21,17 +21,14 @@ limitations under the License.
 import (
 	"fmt"
 
-	"github.com/Bugs5382/golic"
-	"github.com/Bugs5382/golic/impl"
 	"github.com/Bugs5382/golic/internal"
+	"github.com/Bugs5382/golic/internal/impl"
 	"github.com/spf13/cobra"
 )
 
 func RemoveCmd() *cobra.Command {
 
 	opts := internal.Options{}
-
-	opts.MasterConfig = golic.DefaultConfig
 
 	// command
 	var removeCmd = &cobra.Command{

@@ -45,7 +45,7 @@ Determines which files Golic should touch. It uses standard `.gitignore` syntax.
 
 ### 2\. `.golic.yaml`
 
-Contains license text and formatting rules. Golic merges your local file with its [embedded master configuration](.golic.yaml) by default.
+Contains license text and formatting rules. Golic merges your local file with its [embedded master configuration](internal/impl/default.golic.yaml) by default.
 
 Comment rules for common languages are **built in** — including Go, YAML, shell, and TypeScript/JavaScript (`.ts`, `.tsx`, `.mts`, `.cts`, `.js`, `.jsx`, `.mjs`, `.cjs`, which use a `/* … */` block). You only need a local `rules:` entry for unusual file types or to override a built-in. Which files are processed is controlled separately by `.licignore`, so to stamp TypeScript sources you just allow them there (e.g. `!*.ts`).
 
@@ -166,7 +166,7 @@ task test
 | `inject` | Injects license headers based on templates. |
 | `replace` | Replaces an existing header with the configured one in a single pass. |
 | `remove` | Removes license headers matching the config. |
-| `version` | Prints current version. |
+| `version` | Prints the version, and the commit on a second line when known. |
 
 **Common Flags:**
 

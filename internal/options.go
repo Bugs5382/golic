@@ -36,7 +36,6 @@ type Options struct {
 	SearchPath         string
 	Template           string
 	ModifiedExitStatus bool
-	MasterConfig       string
 	Type               LicenseCommandType
 	Verbose            bool
 }

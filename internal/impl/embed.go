@@ -1,4 +1,4 @@
-package golic
+package impl
 
 /*
 Apache License 2.0
@@ -20,5 +20,8 @@ limitations under the License.
 
 import _ "embed"
 
-//go:embed .golic.yaml
-var DefaultConfig string
+// defaultConfig is the built-in ruleset and license catalogue. A local
+// .golic.yaml is merged on top of it at run time.
+//
+//go:embed default.golic.yaml
+var defaultConfig string
