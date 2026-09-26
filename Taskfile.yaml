@@ -73,14 +73,14 @@ tasks:
     cmds:
       - ./bin/golic-${GOOS}-${GOARCH} inject -c "{{.COMMON_LIC}}" -t apache2
   license-dry:
-    desc: Dry run for license injection
+    desc: Check license headers without writing (exit 1 when one is missing)
     env:
       GOOS:
         sh: go env GOOS
       GOARCH:
         sh: go env GOARCH
     cmds:
-      - ./bin/golic-${GOOS}-${GOARCH} inject -c "{{.COMMON_LIC}}" -t apache2 -d
+      - ./bin/golic-${GOOS}-${GOARCH} inject -c "{{.COMMON_LIC}}" -t apache2 -d -x
   license-remove:
     desc: Dry run for license remove
     env:

@@ -23,6 +23,7 @@ import (
 	"os"
 
 	"github.com/Bugs5382/golic/internal"
+	"github.com/Bugs5382/golic/internal/impl"
 	"github.com/Bugs5382/golic/internal/logging"
 	"github.com/spf13/cobra"
 )
@@ -55,4 +56,11 @@ func setupAndValidate(cmd *cobra.Command, opts *internal.Options) error {
 	}
 
 	return nil
+}
+
+// runProcess runs one inject, remove or replace pass. Flags and arguments are
+// valid by now, so usage is no longer printed for whatever this returns.
+func runProcess(cmd *cobra.Command, opts internal.Options) error {
+	cmd.SilenceUsage = true
+	return internal.Command(impl.ProcessFile(cmd.Context(), opts)).MustRun()
 }

@@ -105,9 +105,17 @@ func (u *Process) String() string {
 	return aurora.BrightRed("ERROR, unrecognised command").String()
 }
 
-func (u *Process) ExitCode() int {
-	if u.Opts.ModifiedExitStatus && u.modified > 0 {
-		return 1
+// Changes returns a *internal.ChangesError when -x is set and at least one
+// file was modified (or, in a dry run, would be). It returns nil otherwise.
+func (u *Process) Changes() error {
+	if !u.Opts.ModifiedExitStatus {
+		log.Debug().Int("modified", u.modified).Msg("modified-exit not set; changes do not affect the exit status")
+		return nil
 	}
-	return 0
+	if u.modified == 0 {
+		log.Debug().Msg("modified-exit set and no file needs a change")
+		return nil
+	}
+	log.Debug().Int("modified", u.modified).Bool("dry", u.Opts.Dry).Msg("modified-exit set and files need a change")
+	return &internal.ChangesError{Type: u.Opts.Type, Dry: u.Opts.Dry, Count: u.modified}
 }
