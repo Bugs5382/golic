@@ -1,5 +1,17 @@
 # Golic Change Log
 
+## v0.3.1 - 2026-09-26
+
+### What Changed 👀
+
+#### 📄 Documentation
+
+- docs(readme): apply the lite emoji treatment @Bugs5382 (#30)
+
+### Extra
+
+**Full Changelog**: https://github.com/Bugs5382/golic/compare/v0.3.0...v0.3.1
+
 ## v0.3.0 - 2026-06-13
 
 ### What Changed 👀
