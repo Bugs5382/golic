@@ -192,6 +192,17 @@ task test
 
 Running `golic` with no command prints the help.
 
+## 🔒 Stability
+
+From v1.0.0 the golic CLI is stable. These change only in a new major version:
+
+* the `inject`, `replace`, `remove` and `version` commands and their flags;
+* the `.golic.yaml` and `.licignore` file formats;
+* the `{{copyright}}` placeholder in license templates;
+* the exit codes (`0` clean, `1` files need changes with `-x`, `2` errors).
+
+Minor releases may add commands, flags, built-in licenses and comment rules without breaking existing configs. golic has no Go library API: everything outside `cmd/golic` lives under `internal/`.
+
 ## 🤝 Contributing
 
 We welcome Pull Requests! Please follow these steps:
