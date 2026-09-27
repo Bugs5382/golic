@@ -6,6 +6,7 @@
 
 #### 💥 Breaking Changes
 
+- chore!: mark the public interface stable for v1.0.0 @Bugs5382 (#41)
 - refactor!: internalize the library packages and fix version reporting @Bugs5382 (#37)
 
 #### 🐛 Bug Fixes
