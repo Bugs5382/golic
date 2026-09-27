@@ -20,8 +20,8 @@ limitations under the License.
 
 import (
 	_ "embed"
-	"fmt"
 
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -31,13 +31,13 @@ func RootCmd() *cobra.Command {
 	// command
 	var rootCmd = &cobra.Command{
 		Use:   "golic",
-		Short: "golic license injector",
+		Short: "Inject, replace and remove license headers in source files",
 		Long:  ``,
+		// With no command, show the help and exit 0. Unknown commands are
+		// rejected by cobra before this runs.
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if len(args) == 0 {
-				return fmt.Errorf("%s", "no arguments passed")
-			}
-			return nil
+			log.Debug().Msg("no command given, printing help")
+			return cmd.Help()
 		},
 	}
 
@@ -45,7 +45,7 @@ func RootCmd() *cobra.Command {
 	rootCmd.CompletionOptions.DisableDefaultCmd = true
 
 	// flags
-	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "verbose output (e.g. tracing)")
+	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Verbose output (trace logging)")
 
 	// sub commands
 	rootCmd.AddCommand(VersionCmd())

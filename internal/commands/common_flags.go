@@ -29,10 +29,10 @@ func addCommonFlags(cmd *cobra.Command, opts *internal.Options) {
 	f := cmd.Flags()
 
 	f.BoolVarP(&opts.ModifiedExitStatus, "modified-exit", "x", false, "Exit with status 1 when any file is modified, or would be in a dry run (for CI). Errors exit with 2")
-	f.BoolVarP(&opts.Dry, "dry", "d", false, "Dry run")
+	f.BoolVarP(&opts.Dry, "dry", "d", false, "Report what would change without writing any files")
 
-	f.StringVarP(&opts.Template, "template", "t", "", "License key")
-	f.StringVarP(&opts.LicIgnore, "licignore", "l", ".licignore", ".licignore path")
+	f.StringVarP(&opts.Template, "template", "t", "", "License key from the config to use (for example apache2 or mit)")
+	f.StringVarP(&opts.LicIgnore, "licignore", "l", ".licignore", "Path to the .licignore file that selects which files to process")
 	f.StringVarP(&opts.Copyright, "copyright", "c", fmt.Sprintf("%d %s", internal.Year, "[Insert Company]"), "Copyright holder and year for the license header")
-	f.StringVarP(&opts.ConfigPath, "config-path", "p", ".golic.yaml", "Path to the local configuration overriding config-url")
+	f.StringVarP(&opts.ConfigPath, "config-path", "p", ".golic.yaml", "Path to a local config merged over the built-in rules and licenses")
 }
