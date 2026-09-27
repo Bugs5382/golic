@@ -35,6 +35,7 @@ jobs:
     name: 🚀 Prep Release
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Create GitHub App token
         id: app-token
@@ -115,6 +116,7 @@ jobs:
     name: 📦 Build & Attach Binaries
     if: github.event_name == 'release'
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - name: Checkout Code
         uses: actions/checkout@v6

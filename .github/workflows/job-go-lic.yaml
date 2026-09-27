@@ -15,17 +15,20 @@
 # limitations under the License.
 #
 name: GoLic
+# Pull requests only, and not while the PR is a draft. There is no push trigger:
+# the PR run already tested the tree being merged, so nothing reruns on push to
+# a branch or to main.
 on:
-  push:
-    paths-ignore:
-      - '**.md'
   pull_request:
     branches:
       - main
+    types: [opened, synchronize, reopened, ready_for_review]
 jobs:
   GoLic:
     name: GoLic
+    if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
 
