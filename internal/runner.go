@@ -26,7 +26,9 @@ import (
 type Service interface {
 	Run() error
 	String() string
-	ExitCode() int
+	// Changes reports files that were or would be modified when the caller
+	// asked for that to count as a non-clean result (-x).
+	Changes() error
 }
 
 type ServiceRunner struct {
@@ -40,12 +42,18 @@ func Command(service Service) *ServiceRunner {
 	}
 }
 
-// MustRun Run service once and panics if service is broken
-func (r *ServiceRunner) MustRun() (int, error) {
+// MustRun runs the service once. It returns the run error, or the
+// *ChangesError from Changes when the run succeeded but files need a change.
+func (r *ServiceRunner) MustRun() error {
 	log.Info().Msgf("%s command %s started", emoji.Tractor, r.service)
 	if err := r.service.Run(); err != nil {
 		log.Error().Err(err).Msgf("%s command %s failed", emoji.Bomb, r.service)
-		return 1, err
+		return err
 	}
-	return r.service.ExitCode(), nil
+	if err := r.service.Changes(); err != nil {
+		log.Debug().Err(err).Msgf("command %s finished with changes", r.service)
+		return err
+	}
+	log.Debug().Msgf("command %s finished clean", r.service)
+	return nil
 }

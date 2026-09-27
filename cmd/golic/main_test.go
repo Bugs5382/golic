@@ -24,8 +24,23 @@ import (
 	"testing"
 )
 
-func TestRootCmdErrorMessage(t *testing.T) {
+// buildBinary builds cmd/golic into a temp dir, optionally with -ldflags.
+func buildBinary(t *testing.T, ldflags string) string {
+	t.Helper()
 
+	bin := filepath.Join(t.TempDir(), "golic")
+	args := []string{"build", "-o", bin}
+	if ldflags != "" {
+		args = append(args, "-ldflags", ldflags)
+	}
+	args = append(args, ".")
+
+	build := exec.Command("go", args...) // #nosec G204 -- fixed arguments, test only
+	build.Env = append(build.Environ(), "CGO_ENABLED=0")
+	if out, err := build.CombinedOutput(); err != nil {
+		t.Fatalf("go build failed: %v\n%s", err, out)
+	}
+	return bin
 }
 
 // TestVersionLdflags builds the binary the way `task build` and GoReleaser do
@@ -35,16 +50,8 @@ func TestVersionLdflags(t *testing.T) {
 		t.Skip("builds the binary")
 	}
 
-	bin := filepath.Join(t.TempDir(), "golic")
-	ldflags := "-X 'github.com/Bugs5382/golic/internal/build.Version=v9.8.7' " +
-		"-X 'github.com/Bugs5382/golic/internal/build.Gitsha=abc1234'"
-
-	// #nosec G204 -- fixed arguments, test only
-	build := exec.Command("go", "build", "-o", bin, "-ldflags", ldflags, ".")
-	build.Env = append(build.Environ(), "CGO_ENABLED=0")
-	if out, err := build.CombinedOutput(); err != nil {
-		t.Fatalf("go build failed: %v\n%s", err, out)
-	}
+	bin := buildBinary(t, "-X 'github.com/Bugs5382/golic/internal/build.Version=v9.8.7' "+
+		"-X 'github.com/Bugs5382/golic/internal/build.Gitsha=abc1234'")
 
 	out, err := exec.Command(bin, "version").Output() // #nosec G204 -- binary built above
 	if err != nil {

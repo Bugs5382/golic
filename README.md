@@ -101,11 +101,23 @@ golic remove -t apacheX
 
 ### CI/CD Integration
 
-To fail a build if licenses are missing (e.g., a developer forgot to run Golic), use the `-x` (exit code) flag:
+To fail a build if licenses are missing (e.g., a developer forgot to run Golic), add `-x` (`--modified-exit`) to a dry run:
 
 ```bash
 golic inject --dry -x -t apache2
 ```
+
+With `-x`, golic exits 1 when any file would change and lists the count, for example `1 file(s) need a license header`. Without `--dry`, `-x` still exits 1 after it modifies files.
+
+### Exit Codes
+
+| Code | Meaning |
+| :--- | :--- |
+| `0` | Clean: nothing needed a change, or `-x` was not set. |
+| `1` | `-x` was set and files were modified, or in a dry run need a header added, replaced or removed. |
+| `2` | A real error: an unknown flag, a missing template, a license key or config that cannot be found or parsed, or a file that cannot be read or written. |
+
+CI jobs should treat any non-zero status as a failure. Scripts that need to tell "headers missing" apart from "golic could not run" can check for `1` and `2`.
 
 ## 🏗 Development
 
@@ -143,7 +155,7 @@ task lint
 
 `task lint` stamps missing license headers first, using the binary from `task build`.
 
-To verify only the project licenses without changing any files, use:
+To verify only the project licenses without changing any files (exit 1 when a header is missing), use:
 
 ```bash
 task license-dry
@@ -172,6 +184,7 @@ task test
 
 * `-c, --copyright` : Set the holder/year (Default: `YYYY [Insert Company]`). YYYY defaults to the current year.
 * `-d, --dry` : Run without writing to files.
+* `-x, --modified-exit` : Exit with status 1 when any file is modified, or would be in a dry run.
 * `-t, --template` : Specify which license key to use from the config.
 * `-v, --verbose` : Enable detailed trace logging.
 

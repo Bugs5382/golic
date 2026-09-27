@@ -19,10 +19,7 @@ limitations under the License.
 */
 
 import (
-	"fmt"
-
 	"github.com/Bugs5382/golic/internal"
-	"github.com/Bugs5382/golic/internal/impl"
 	"github.com/spf13/cobra"
 )
 
@@ -39,22 +36,8 @@ func InjectCmd() *cobra.Command {
 			return setupAndValidate(cmd, &opts)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			// we are injecting!
-			opts.Type = 0
-
-			// go ahead and start the inject process!
-			i := impl.ProcessFile(cmd.Context(), opts)
-			exitCode, err := internal.Command(i).MustRun()
-
-			if err != nil {
-				return err
-			}
-
-			if exitCode != 0 {
-				return fmt.Errorf("something went wrong")
-			}
-
-			return nil
+			opts.Type = internal.LicenseInject
+			return runProcess(cmd, opts)
 		},
 	}
 

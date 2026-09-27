@@ -28,7 +28,7 @@ import (
 func addCommonFlags(cmd *cobra.Command, opts *internal.Options) {
 	f := cmd.Flags()
 
-	f.BoolVarP(&opts.ModifiedExitStatus, "modified-exit", "x", false, "If enabled, exits with status 1 when any file is modified. The settings is used by CI")
+	f.BoolVarP(&opts.ModifiedExitStatus, "modified-exit", "x", false, "Exit with status 1 when any file is modified, or would be in a dry run (for CI). Errors exit with 2")
 	f.BoolVarP(&opts.Dry, "dry", "d", false, "Dry run")
 
 	f.StringVarP(&opts.Template, "template", "t", "", "License key")

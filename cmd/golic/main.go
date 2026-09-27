@@ -19,20 +19,54 @@ limitations under the License.
 */
 
 import (
+	"errors"
 	"fmt"
+	"io"
 	"os"
 
+	"github.com/Bugs5382/golic/internal"
 	"github.com/Bugs5382/golic/internal/commands"
 	"github.com/Bugs5382/golic/internal/logging"
 	"github.com/enescakir/emoji"
+	"github.com/rs/zerolog/log"
+)
+
+// Exit statuses. They are part of the CLI contract: CI jobs run
+// `golic inject --dry -x` and treat 1 as "headers missing".
+const (
+	exitClean   = 0 // nothing to change, or -x not set
+	exitChanges = 1 // -x set and files were (or in a dry run would be) modified
+	exitError   = 2 // bad flags, bad config, unreadable files and other failures
 )
 
 func main() {
-
 	logging.Init(false)
+	os.Exit(run(os.Args[1:], os.Stdout, os.Stderr))
+}
 
-	if err := commands.RootCmd().Execute(); err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "%v  Error: %v\n", emoji.Bomb, err)
-		os.Exit(1)
+// run executes golic with args and returns the process exit status.
+func run(args []string, stdout, stderr io.Writer) int {
+	root := commands.RootCmd()
+	root.SetArgs(args)
+	root.SetOut(stdout)
+	root.SetErr(stderr)
+	// main reports the error itself, once, with the matching exit status.
+	root.SilenceErrors = true
+
+	err := root.Execute()
+	if err == nil {
+		log.Debug().Int("exit", exitClean).Msg("golic finished clean")
+		return exitClean
 	}
+
+	var changes *internal.ChangesError
+	if errors.As(err, &changes) {
+		log.Debug().Int("exit", exitChanges).Int("files", changes.Count).Bool("dry", changes.Dry).Msg("golic finished with changes")
+		_, _ = fmt.Fprintf(stderr, "%v  %v\n", emoji.Warning, err)
+		return exitChanges
+	}
+
+	log.Debug().Int("exit", exitError).Err(err).Msg("golic failed")
+	_, _ = fmt.Fprintf(stderr, "%v  Error: %v\n", emoji.Bomb, err)
+	return exitError
 }

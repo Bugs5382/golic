@@ -19,10 +19,7 @@ limitations under the License.
 */
 
 import (
-	"fmt"
-
 	"github.com/Bugs5382/golic/internal"
-	"github.com/Bugs5382/golic/internal/impl"
 	"github.com/spf13/cobra"
 )
 
@@ -39,22 +36,8 @@ func ReplaceCmd() *cobra.Command {
 			return setupAndValidate(cmd, &opts)
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			// we are replacing!
 			opts.Type = internal.LicenseReplace
-
-			// go ahead and start the replace process!
-			i := impl.ProcessFile(cmd.Context(), opts)
-			exitCode, err := internal.Command(i).MustRun()
-
-			if err != nil {
-				return err
-			}
-
-			if exitCode != 0 {
-				return fmt.Errorf("something went wrong")
-			}
-
-			return nil
+			return runProcess(cmd, opts)
 		},
 	}
 
