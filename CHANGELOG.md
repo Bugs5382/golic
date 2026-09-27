@@ -10,12 +10,17 @@
 
 #### 🐛 Bug Fixes
 
+- fix(cli): print help when golic runs without a command @Bugs5382 (#39)
 - fix(cli): exit 1 when files need changes and 2 on errors @Bugs5382 (#38)
 
 #### 📄 Documentation
 
 - docs(readme): use the Taskfile commands instead of make @Bugs5382 (#33)
 - docs(readme): apply the lite emoji treatment @Bugs5382 (#30)
+
+#### 🧩 Dependency Updates
+
+- chore(deps): bump golang.org/x/sys to v0.44.0 @Bugs5382 (#40)
 
 ### Extra
 
