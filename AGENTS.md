@@ -37,6 +37,7 @@ missing, so treat any change there as breaking.
 
 - See `CLAUDE.md` for the branch/commit/PR rules; they are enforced by the git hooks in
   `.claude/hooks` (run `bash .claude/hooks/install.sh` once per clone).
+- Open every PR as a draft. CI skips drafts, so run the full checks locally, push once they pass, and mark the PR ready when the work is finished; see CLAUDE.md "CI and Actions minutes".
 - golic builds itself for its license check (`job-go-lic.yaml`); it does not use the hub's shared
   `job-golic`.
 - The Release Manager rewrites the Taskfile `VERSION` and `CHANGELOG.md` on `main`. Leave both to it.
