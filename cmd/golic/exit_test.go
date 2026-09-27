@@ -115,6 +115,17 @@ func TestExitCodes(t *testing.T) {
 			stderr: "unknown flag",
 		},
 		{
+			name: "no command prints help and exits 0",
+			args: []string{},
+			want: exitClean,
+		},
+		{
+			name:   "unknown command exits 2",
+			args:   []string{"nope"},
+			want:   exitError,
+			stderr: "unknown command",
+		},
+		{
 			name: "version exits 0",
 			args: []string{"version"},
 			want: exitClean,

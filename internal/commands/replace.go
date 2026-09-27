@@ -30,7 +30,7 @@ func ReplaceCmd() *cobra.Command {
 	// command
 	var replaceCmd = &cobra.Command{
 		Use:   "replace",
-		Short: "Replace licenses",
+		Short: "Replace the existing license header with the configured one",
 		Long:  `Remove the existing license header and inject the configured one in a single pass.`,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return setupAndValidate(cmd, &opts)

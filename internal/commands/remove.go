@@ -30,7 +30,7 @@ func RemoveCmd() *cobra.Command {
 	// command
 	var removeCmd = &cobra.Command{
 		Use:   "remove",
-		Short: "Remove licenses",
+		Short: "Remove the license header from files",
 		Long:  ``,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return setupAndValidate(cmd, &opts)

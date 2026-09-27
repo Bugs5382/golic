@@ -35,7 +35,7 @@ func TestRoot(t *testing.T) {
 
 	t.Parallel()
 
-	t.Run("root no args passed", func(t *testing.T) {
+	t.Run("no command prints help", func(t *testing.T) {
 		cmd := RootCmd()
 
 		b := new(bytes.Buffer)
@@ -46,7 +46,24 @@ func TestRoot(t *testing.T) {
 		cmd.SetArgs([]string{})
 
 		err := cmd.Execute()
-		assert.ErrorContains(t, err, "no arguments passed")
+		assert.NoError(t, err)
+		assert.Contains(t, b.String(), "Usage:")
+		assert.Contains(t, b.String(), "Available Commands:")
+		assert.NotContains(t, b.String(), "no arguments passed")
+	})
+
+	t.Run("unknown command is an error", func(t *testing.T) {
+		cmd := RootCmd()
+
+		b := new(bytes.Buffer)
+
+		cmd.SetOut(b)
+		cmd.SetErr(b)
+
+		cmd.SetArgs([]string{"nope"})
+
+		err := cmd.Execute()
+		assert.ErrorContains(t, err, "unknown command")
 	})
 
 }

@@ -30,7 +30,7 @@ func InjectCmd() *cobra.Command {
 	// command
 	var injectCmd = &cobra.Command{
 		Use:   "inject",
-		Short: "Injects licenses",
+		Short: "Add the license header to files that are missing it",
 		Long:  ``,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			return setupAndValidate(cmd, &opts)

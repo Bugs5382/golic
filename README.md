@@ -6,12 +6,12 @@ Golic automates the tedious task of ensuring every source file in your project h
 
 ```bash
 # Preview changes before applying
-golic inject -c="2026 MyCompany ltd." --dry
+golic inject -t apache2 -c "2026 MyCompany ltd." --dry
 ```
 
 ## 📥 Installation
 
-Install the binary using Go 1.16+:
+Install the binary using Go 1.26+:
 
 ```bash
 go install github.com/Bugs5382/golic/cmd/golic@latest
@@ -175,18 +175,22 @@ task test
 
 | Command | Description |
 | :--- | :--- |
-| `inject` | Injects license headers based on templates. |
+| `inject` | Adds the license header to files that are missing it. |
 | `replace` | Replaces an existing header with the configured one in a single pass. |
-| `remove` | Removes license headers matching the config. |
+| `remove` | Removes the license header matching the config. |
 | `version` | Prints the version, and the commit on a second line when known. |
 
 **Common Flags:**
 
+* `-t, --template` : The license key to use from the config, for example `apache2` or `mit`. Required.
 * `-c, --copyright` : Set the holder/year (Default: `YYYY [Insert Company]`). YYYY defaults to the current year.
-* `-d, --dry` : Run without writing to files.
-* `-x, --modified-exit` : Exit with status 1 when any file is modified, or would be in a dry run.
-* `-t, --template` : Specify which license key to use from the config.
+* `-d, --dry` : Report what would change without writing any files.
+* `-x, --modified-exit` : Exit with status 1 when any file is modified, or would be in a dry run. Errors exit with 2.
+* `-l, --licignore` : Path to the `.licignore` file (Default: `.licignore`).
+* `-p, --config-path` : Path to a local config merged over the built-in rules and licenses (Default: `.golic.yaml`).
 * `-v, --verbose` : Enable detailed trace logging.
+
+Running `golic` with no command prints the help.
 
 ## 🤝 Contributing
 
