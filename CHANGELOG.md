@@ -1,12 +1,16 @@
 # Golic Change Log
 
-## v1.0.0 - 2026-09-26
+## v1.0.0 - 2026-09-27
 
 ### What Changed 👀
 
 #### 💥 Breaking Changes
 
 - refactor!: internalize the library packages and fix version reporting @Bugs5382 (#37)
+
+#### 🐛 Bug Fixes
+
+- fix(cli): exit 1 when files need changes and 2 on errors @Bugs5382 (#38)
 
 #### 📄 Documentation
 
