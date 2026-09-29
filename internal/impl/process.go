@@ -22,11 +22,12 @@ import (
 	"context"
 	"os"
 
+	"github.com/Bugs5382/golic/internal/logging"
+
 	"github.com/Bugs5382/golic/internal"
 	"github.com/enescakir/emoji"
 	"github.com/goccy/go-yaml"
 	"github.com/logrusorgru/aurora"
-	"github.com/rs/zerolog/log"
 )
 
 type Process struct {
@@ -50,39 +51,39 @@ func ProcessFile(ctx context.Context, options internal.Options) *Process {
 
 func (u *Process) Run() (err error) {
 	// debug commands
-	log.Debug().Msgf("%s reading config path: %s", emoji.OpenBook, u.Opts.ConfigPath)
-	log.Debug().Msgf("%s reading lic ignore path: %s", emoji.OpenBook, u.Opts.LicIgnore)
-	log.Debug().Msgf("%s reading template: %s", emoji.OpenBook, u.Opts.Template)
-	log.Debug().Msgf("%s reading search path: %s", emoji.OpenBook, u.Opts.SearchPath)
+	logging.L().Debug().Msgf("%s reading config path: %s", emoji.OpenBook, u.Opts.ConfigPath)
+	logging.L().Debug().Msgf("%s reading lic ignore path: %s", emoji.OpenBook, u.Opts.LicIgnore)
+	logging.L().Debug().Msgf("%s reading template: %s", emoji.OpenBook, u.Opts.Template)
+	logging.L().Debug().Msgf("%s reading search path: %s", emoji.OpenBook, u.Opts.SearchPath)
 
 	if u.cfgBase, err = u.readCommonConfig(); err != nil {
 		return
 	}
 
 	if _, err = os.Stat(u.Opts.ConfigPath); !os.IsNotExist(err) {
-		log.Debug().Msgf("%s reading %s", emoji.OpenBook, aurora.BrightCyan(u.Opts.ConfigPath))
-		log.Debug().Msgf("%s merging %s with %s", emoji.ConstructionWorker, aurora.BrightCyan(u.Opts.ConfigPath), aurora.BrightCyan("master config"))
+		logging.L().Debug().Msgf("%s reading %s", emoji.OpenBook, aurora.BrightCyan(u.Opts.ConfigPath))
+		logging.L().Debug().Msgf("%s merging %s with %s", emoji.ConstructionWorker, aurora.BrightCyan(u.Opts.ConfigPath), aurora.BrightCyan("master config"))
 		if u.cfg, err = u.readLocalConfig(); err != nil {
 			return
 		}
 	} else {
 		if u.Opts.ConfigPath == "" {
-			log.Debug().Msgf("%s no local found; using embeded.", emoji.FileFolder)
+			logging.L().Debug().Msgf("%s no local found; using embeded.", emoji.FileFolder)
 		} else {
-			log.Debug().Msgf("%s skipping local %s", emoji.FileFolder, aurora.BrightCyan(u.Opts.ConfigPath))
+			logging.L().Debug().Msgf("%s skipping local %s", emoji.FileFolder, aurora.BrightCyan(u.Opts.ConfigPath))
 		}
 		u.cfg = u.cfgBase
 	}
 
-	if log.Debug().Enabled() {
+	if logging.L().Debug().Enabled() {
 		// Marshal the merged config to YAML for a "pretty-print" effect
 		confBytes, _ := yaml.Marshal(u.cfg)
 
-		log.Debug().
+		logging.L().Debug().
 			Msgf("Final Configuration Loaded:\n---\n%s\n---", string(confBytes))
 	}
 
-	log.Debug().Strs("ignore", u.cfg.Golic.Ignore).Msg("config ignore patterns in effect")
+	logging.L().Debug().Strs("ignore", u.cfg.Golic.Ignore).Msg("config ignore patterns in effect")
 	if u.scope, err = newScope(u.Opts.LicIgnore, u.cfg.Golic.Ignore); err != nil {
 		return err
 	}
@@ -108,13 +109,13 @@ func (u *Process) String() string {
 // file was modified (or, in a dry run, would be). It returns nil otherwise.
 func (u *Process) Changes() error {
 	if !u.Opts.ModifiedExitStatus {
-		log.Debug().Int("modified", u.modified).Msg("modified-exit not set; changes do not affect the exit status")
+		logging.L().Debug().Int("modified", u.modified).Msg("modified-exit not set; changes do not affect the exit status")
 		return nil
 	}
 	if u.modified == 0 {
-		log.Debug().Msg("modified-exit set and no file needs a change")
+		logging.L().Debug().Msg("modified-exit set and no file needs a change")
 		return nil
 	}
-	log.Debug().Int("modified", u.modified).Bool("dry", u.Opts.Dry).Msg("modified-exit set and files need a change")
+	logging.L().Debug().Int("modified", u.modified).Bool("dry", u.Opts.Dry).Msg("modified-exit set and files need a change")
 	return &internal.ChangesError{Type: u.Opts.Type, Dry: u.Opts.Dry, Count: u.modified}
 }

@@ -25,11 +25,12 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/Bugs5382/golic/internal/logging"
+
 	"github.com/Bugs5382/golic/internal"
 	"github.com/enescakir/emoji"
 	"github.com/goccy/go-yaml"
 	"github.com/logrusorgru/aurora"
-	"github.com/rs/zerolog/log"
 )
 
 func injectFile(path string, o internal.Options, config *Config) (rule string, skip bool, err error) {
@@ -255,7 +256,7 @@ func (u *Process) readLocalConfig() (*Config, error) {
 
 	// Local ignore patterns add to the built-in list; they never replace it.
 	if len(localCfg.Golic.Ignore) > 0 {
-		log.Debug().Strs("ignore", localCfg.Golic.Ignore).Msg("adding local ignore patterns to the built-in list")
+		logging.L().Debug().Strs("ignore", localCfg.Golic.Ignore).Msg("adding local ignore patterns to the built-in list")
 		rc.Golic.Ignore = append(rc.Golic.Ignore, localCfg.Golic.Ignore...)
 	}
 
@@ -282,13 +283,13 @@ func (u *Process) traverseFiles() error {
 	generated := 0
 	p := func(path string, o internal.Options, config *Config) (err error) {
 		if reason, out := u.scope.excluded(path); out {
-			log.Trace().Str("path", path).Str("reason", reason).Msg("out of scope")
+			logging.L().Trace().Str("path", path).Str("reason", reason).Msg("out of scope")
 			outOfScope++
 			return nil
 		}
 		ruleName := getRule(config, path)
 		if ruleName == "" {
-			log.Trace().Str("path", path).Msg("no rule matches; skipping")
+			logging.L().Trace().Str("path", path).Msg("no rule matches; skipping")
 			return nil
 		}
 		marker, gen, err := isGenerated(path)
@@ -296,7 +297,7 @@ func (u *Process) traverseFiles() error {
 			return err
 		}
 		if gen {
-			log.Debug().Str("path", path).Str("marker", marker).Msg("generated file; skipping")
+			logging.L().Debug().Str("path", path).Str("marker", marker).Msg("generated file; skipping")
 			generated++
 			return nil
 		}
@@ -321,8 +322,8 @@ func (u *Process) traverseFiles() error {
 			prefix = aurora.Bold(aurora.Yellow(fmt.Sprintf("%s DRY RUN: ", emoji.TestTube))).String()
 		}
 
-		if log.Debug().Enabled() {
-			log.Info().Msgf("%s %s  %s %s %s",
+		if logging.L().Debug().Enabled() {
+			logging.L().Info().Msgf("%s %s  %s %s %s",
 				prefix,
 				emoji.Minus,
 				cp,
@@ -330,7 +331,7 @@ func (u *Process) traverseFiles() error {
 				aurora.Gray(12, fmt.Sprintf("[%s]", rule)),
 			)
 		} else {
-			log.Info().Msgf("%s %s  %s %s",
+			logging.L().Info().Msgf("%s %s  %s %s",
 				prefix,
 				emoji.Minus,
 				cp,
@@ -350,7 +351,7 @@ func (u *Process) traverseFiles() error {
 					return nil
 				}
 				if pattern, skip := u.scope.skipDir(path); skip {
-					log.Debug().Str("dir", path).Str("ignore", pattern).Msg("not walking an ignored directory")
+					logging.L().Debug().Str("dir", path).Str("ignore", pattern).Msg("not walking an ignored directory")
 					return filepath.SkipDir
 				}
 				return nil
@@ -363,7 +364,7 @@ func (u *Process) traverseFiles() error {
 	}
 
 	u.modified = visited - skipped
-	log.Debug().Int("visited", visited).Int("unchanged", skipped).Int("outOfScope", outOfScope).Int("generated", generated).Msg("walk finished")
+	logging.L().Debug().Int("visited", visited).Int("unchanged", skipped).Int("outOfScope", outOfScope).Int("generated", generated).Msg("walk finished")
 	displaySummary(skipped, visited)
 
 	return nil
@@ -384,21 +385,21 @@ func processUpdate(path string, o internal.Options, config *Config) (rule string
 
 func displaySummary(skipped, visited int) {
 	if skipped == visited {
-		log.Info().Msgf("%s %v/%v %s", emoji.Ice, aurora.BrightCyan(visited-skipped), aurora.BrightWhite(visited), aurora.BrightCyan("changed"))
+		logging.L().Info().Msgf("%s %v/%v %s", emoji.Ice, aurora.BrightCyan(visited-skipped), aurora.BrightWhite(visited), aurora.BrightCyan("changed"))
 		return
 	}
-	log.Info().Msgf("%s %v/%v %s", emoji.Fire, aurora.BrightYellow(visited-skipped), aurora.BrightWhite(visited), aurora.BrightYellow("changed"))
+	logging.L().Info().Msgf("%s %v/%v %s", emoji.Fire, aurora.BrightYellow(visited-skipped), aurora.BrightWhite(visited), aurora.BrightYellow("changed"))
 }
 
 // read File
 func read(f string) (s string, err error) {
-	log.Trace().Str("path", f).Msg("reading source file")
+	logging.L().Trace().Str("path", f).Msg("reading source file")
 	// The path comes from golic's own walk of the working tree, filtered by
 	// .licignore. Reading the files the user asked golic to process is the
 	// point of the tool, so this is not untrusted input (#34).
 	content, err := os.ReadFile(f) // #nosec G304 -- path comes from the working-tree walk
 	if err != nil {
-		log.Debug().Err(err).Str("path", f).Msg("reading source file failed")
+		logging.L().Debug().Err(err).Str("path", f).Msg("reading source file failed")
 		return
 	}
 	// Convert []byte to string and print to screen
@@ -467,11 +468,11 @@ func splitSource(source string, rules []string) (header, footer string) {
 	for _, r := range rules {
 		header, footer = findHeaderAndFooter(lines, r, rules)
 		if header != "" {
-			log.Trace().Str("under", r).Int("headerLines", strings.Count(header, "\n")+1).Msg("license goes below a matched line")
+			logging.L().Trace().Str("under", r).Int("headerLines", strings.Count(header, "\n")+1).Msg("license goes below a matched line")
 			return
 		}
 	}
-	log.Trace().Strs("under", rules).Msg("no under pattern matched; license goes at the top")
+	logging.L().Trace().Strs("under", rules).Msg("no under pattern matched; license goes at the top")
 	return
 }
 

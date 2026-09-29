@@ -19,54 +19,71 @@ limitations under the License.
 */
 
 import (
+	"io"
 	"os"
 	"strings"
+	"sync/atomic"
 	"time"
 
+	golog "github.com/Bugs5382/go-log"
 	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 )
 
-// Init sets up logging configuration
+// service is the name go-log stamps on every line.
+const service = "golic"
+
+// current holds the logger every package logs through. Init swaps it, and the
+// commands run in parallel tests, so it is read and written atomically.
+var current atomic.Pointer[zerolog.Logger]
+
+func init() {
+	Init(false)
+}
+
+// L returns the logger golic logs through.
+func L() *zerolog.Logger {
+	return current.Load()
+}
+
+// Init builds the golic logger on go-log. LOG_LEVEL is read by go-log; when it
+// is unset or not a level name, verbose selects trace and the default is info.
+// Output goes to stderr so it never mixes with what a command prints on stdout:
+// human-readable console text by default, JSON when LOG_FORMAT=json. Under
+// `go test` logging is disabled.
 func Init(verbose bool) {
-	// If we are in a test, stop everything immediately.
 	if isTest() {
-		zerolog.SetGlobalLevel(zerolog.Disabled)
+		l := zerolog.Nop()
+		current.Store(&l)
 		return
 	}
+	l := build(verbose, os.Stderr)
+	current.Store(&l)
+}
 
-	setLogFormat()
+// build returns the go-log logger for the given verbosity, writing to out. It
+// is split from Init so tests can drive it directly.
+func build(verbose bool, out io.Writer) zerolog.Logger {
+	l := golog.New(service)
+	level := os.Getenv("LOG_LEVEL")
 
-	levelStr := os.Getenv("LOG_LEVEL")
-	if levelStr != "" {
-		if parsedLevel, err := zerolog.ParseLevel(strings.ToLower(levelStr)); err == nil {
-			zerolog.SetGlobalLevel(parsedLevel)
-			return
+	if _, err := zerolog.ParseLevel(strings.ToLower(level)); level == "" || err != nil {
+		if verbose {
+			l = l.Level(zerolog.TraceLevel)
+		} else {
+			l = l.Level(zerolog.InfoLevel)
 		}
 	}
 
-	if verbose {
-		zerolog.SetGlobalLevel(zerolog.DebugLevel)
-	} else {
-		zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	if strings.ToLower(os.Getenv("LOG_FORMAT")) == "json" {
+		return l.Output(out)
 	}
+	return l.Output(zerolog.ConsoleWriter{
+		Out:        out,
+		TimeFormat: time.RFC3339,
+	})
 }
 
 func isTest() bool {
 	return strings.HasSuffix(os.Args[0], ".test") ||
 		strings.Contains(strings.Join(os.Args, " "), "-test.")
-}
-
-func setLogFormat() {
-	format := strings.ToLower(os.Getenv("LOG_FORMAT"))
-
-	if format == "json" {
-		return
-	}
-
-	// Otherwise, default to ConsoleWriter (Text)
-	log.Logger = log.Output(zerolog.ConsoleWriter{
-		Out:        os.Stderr,
-		TimeFormat: time.RFC3339,
-	})
 }

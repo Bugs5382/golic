@@ -24,9 +24,10 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/Bugs5382/golic/internal/logging"
+
 	"github.com/bmatcuk/doublestar/v4"
 	"github.com/denormal/go-gitignore"
-	"github.com/rs/zerolog/log"
 )
 
 // Scope decides which walked paths golic may touch (#46). It layers the
@@ -57,10 +58,10 @@ type lift struct {
 
 // newScope reads the .licignore at path and pairs it with the config ignores.
 func newScope(path string, patterns []string) (*scope, error) {
-	log.Debug().Str("licignore", path).Int("ignorePatterns", len(patterns)).Msg("building the file scope")
+	logging.L().Debug().Str("licignore", path).Int("ignorePatterns", len(patterns)).Msg("building the file scope")
 	gi, err := gitignore.NewFromFile(path)
 	if err != nil {
-		log.Debug().Err(err).Str("licignore", path).Msg("reading .licignore failed")
+		logging.L().Debug().Err(err).Str("licignore", path).Msg("reading .licignore failed")
 		return nil, err
 	}
 	raw, err := os.ReadFile(path) // #nosec G304 -- the .licignore the user pointed golic at
@@ -81,10 +82,10 @@ func newScope(path string, patterns []string) (*scope, error) {
 		}
 		pattern := strings.TrimPrefix(line, "!")
 		if isCatchAll(pattern, patterns) {
-			log.Trace().Str("line", line).Msg(".licignore negation is a catch-all; it does not lift built-in ignores")
+			logging.L().Trace().Str("line", line).Msg(".licignore negation is a catch-all; it does not lift built-in ignores")
 			continue
 		}
-		log.Debug().Str("line", line).Msg(".licignore negation lifts built-in ignores for the paths it matches")
+		logging.L().Debug().Str("line", line).Msg(".licignore negation lifts built-in ignores for the paths it matches")
 		s.lifts = append(s.lifts, lift{line: line, matcher: gitignore.New(strings.NewReader(pattern), base, nil)})
 	}
 	return s, nil
@@ -116,7 +117,7 @@ func (s *scope) excluded(path string) (reason string, out bool) {
 	}
 	for _, l := range s.lifts {
 		if l.matcher.Match(path) != nil {
-			log.Debug().Str("path", path).Str("ignore", pattern).Str("licignore", l.line).Msg("built-in ignore lifted by .licignore")
+			logging.L().Debug().Str("path", path).Str("ignore", pattern).Str("licignore", l.line).Msg("built-in ignore lifted by .licignore")
 			return "", false
 		}
 	}

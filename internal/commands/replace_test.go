@@ -26,7 +26,6 @@ import (
 	"testing"
 
 	"github.com/Bugs5382/golic/internal"
-	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -34,8 +33,6 @@ import (
 func TestReplace(t *testing.T) {
 
 	_ = os.Chdir(internal.GetProjectRoot())
-
-	zerolog.SetGlobalLevel(zerolog.Disabled)
 
 	t.Parallel()
 
@@ -179,8 +176,6 @@ func runReplace(args ...string) error {
 // TestReplaceFiles exercises the replace command against real files. It does not
 // run in parallel because it changes the process working directory.
 func TestReplaceFiles(t *testing.T) {
-	zerolog.SetGlobalLevel(zerolog.Disabled)
-
 	t.Run("replace swaps an existing header for the configured one", func(t *testing.T) {
 		dir := setupReplaceWorkspace(t)
 		sample := filepath.Join(dir, "sample.go")

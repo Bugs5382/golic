@@ -19,8 +19,8 @@ limitations under the License.
 */
 
 import (
+	"github.com/Bugs5382/golic/internal/logging"
 	"github.com/enescakir/emoji"
-	"github.com/rs/zerolog/log"
 )
 
 type Service interface {
@@ -45,15 +45,15 @@ func Command(service Service) *ServiceRunner {
 // MustRun runs the service once. It returns the run error, or the
 // *ChangesError from Changes when the run succeeded but files need a change.
 func (r *ServiceRunner) MustRun() error {
-	log.Info().Msgf("%s command %s started", emoji.Tractor, r.service)
+	logging.L().Info().Msgf("%s command %s started", emoji.Tractor, r.service)
 	if err := r.service.Run(); err != nil {
-		log.Error().Err(err).Msgf("%s command %s failed", emoji.Bomb, r.service)
+		logging.L().Error().Err(err).Msgf("%s command %s failed", emoji.Bomb, r.service)
 		return err
 	}
 	if err := r.service.Changes(); err != nil {
-		log.Debug().Err(err).Msgf("command %s finished with changes", r.service)
+		logging.L().Debug().Err(err).Msgf("command %s finished with changes", r.service)
 		return err
 	}
-	log.Debug().Msgf("command %s finished clean", r.service)
+	logging.L().Debug().Msgf("command %s finished clean", r.service)
 	return nil
 }

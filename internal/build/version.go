@@ -22,7 +22,7 @@ import (
 	"fmt"
 	"runtime/debug"
 
-	"github.com/rs/zerolog/log"
+	"github.com/Bugs5382/golic/internal/logging"
 )
 
 // Version and Gitsha are stamped at link time by `task build` and GoReleaser:
@@ -70,30 +70,30 @@ func resolve(ldVersion, ldCommit string, bi *debug.BuildInfo, ok bool) (version,
 	version, commit = ldVersion, ldCommit
 
 	if version != "" {
-		log.Debug().Str("version", version).Msg("version taken from the linker flags")
+		logging.L().Debug().Str("version", version).Msg("version taken from the linker flags")
 	}
 
 	if ok && bi != nil {
 		if version == "" {
 			switch bi.Main.Version {
 			case "", Devel:
-				log.Debug().Str("module_version", bi.Main.Version).Msg("build info has no release version")
+				logging.L().Debug().Str("module_version", bi.Main.Version).Msg("build info has no release version")
 			default:
 				version = bi.Main.Version
-				log.Debug().Str("version", version).Msg("version taken from the module build info")
+				logging.L().Debug().Str("version", version).Msg("version taken from the module build info")
 			}
 		}
 		if commit == "" {
 			commit = vcsRevision(bi)
 		}
 	} else {
-		log.Debug().Msg("no build info available")
+		logging.L().Debug().Msg("no build info available")
 	}
 
 	if version == "" {
 		version = Devel
 	}
-	log.Trace().Str("version", version).Str("commit", commit).Msg("version resolved")
+	logging.L().Trace().Str("version", version).Str("commit", commit).Msg("version resolved")
 	return version, commit
 }
 
@@ -106,7 +106,7 @@ func vcsRevision(bi *debug.BuildInfo) string {
 		if len(rev) > shortCommitLen {
 			rev = rev[:shortCommitLen]
 		}
-		log.Trace().Str("commit", rev).Msg("commit taken from the vcs build setting")
+		logging.L().Trace().Str("commit", rev).Msg("commit taken from the vcs build setting")
 		return rev
 	}
 	return ""

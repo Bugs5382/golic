@@ -287,6 +287,15 @@ task test
 
 Running `golic` with no command prints the help.
 
+### Logging
+
+golic logs through [go-log](https://github.com/Bugs5382/go-log). Logs go to stderr, so they never mix with what a command prints on stdout, and each line carries `service=golic`.
+
+| Variable | Effect |
+|---|---|
+| `LOG_LEVEL` | `trace`, `debug`, `info`, `warn`, `error` or `disabled`. When set to a valid level it wins over `-v`. Unset: `info`, or `trace` with `-v`. |
+| `LOG_FORMAT` | `json` for one JSON object per line. Anything else, or unset, gives readable console text. |
+
 ## 🔒 Stability
 
 From v1.0.0 the golic CLI is stable. These change only in a new major version:

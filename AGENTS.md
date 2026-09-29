@@ -24,7 +24,10 @@ missing, so treat any change there as breaking.
   ruleset (`default.golic.yaml`). `ignore.go` decides which files are in scope (`.licignore` over
   the config `ignore:` list); `generated.go` skips files with a generated-code marker.
 - `internal/build/` - version reporting: linker values first, then `runtime/debug.ReadBuildInfo`.
-- `internal/` - options, glob matching, the service runner; `internal/logging/` sets up zerolog.
+- `internal/` - options, glob matching, the service runner; `internal/logging/` builds the logger on
+  `github.com/Bugs5382/go-log` and every package logs through `logging.L()`. Do not import
+  `rs/zerolog/log` or call `zerolog.SetGlobalLevel` elsewhere; `logging` is the only package that
+  touches zerolog (for the stderr console writer and the `-v` trace level).
 
 ## Build, test, lint
 
