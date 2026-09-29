@@ -90,7 +90,9 @@ func TestInject(t *testing.T) {
 
 		err := cmd.Execute()
 
-		assert.ErrorContains(t, err, "custom ignore file not found: .licignoreNotFound")
+		assert.ErrorContains(t, err, "ignore file not found: .licignoreNotFound")
+		assert.ErrorContains(t, err, "never stamps a whole tree by accident")
+		assert.ErrorContains(t, err, "an empty file uses only the built-in ignores")
 	})
 
 	t.Run("inject -- template mit (no error)", func(t *testing.T) {

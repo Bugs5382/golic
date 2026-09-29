@@ -414,3 +414,24 @@ golic:
     .swift:
       prefix: "/*"
       suffix: "*/"
+  # Files golic never processes (#46): VCS metadata, dependency, build and
+  # coverage trees, lock files and generated code. Patterns are doublestar
+  # globs relative to the directory golic runs in, checked after .licignore.
+  # A local .golic.yaml adds to this list. A specific "!" line in .licignore
+  # (this exact pattern, a path, or a narrower glob) lifts an entry; broad
+  # whitelist lines such as "!*.go" or "!*/" do not. .git is never walked.
+  ignore:
+    - ".git/**"
+    - "**/node_modules/**"
+    - "**/vendor/**"
+    - "**/dist/**"
+    - "**/coverage/**"
+    - "**/*.pb.go"
+    - "**/*_gen.go"
+    - "**/*.gen.go"
+    - "**/zz_generated*.go"
+    - "**/*.connect.go"
+    - "**/*.d.ts"
+    - "**/*.lock"
+    - "**/package-lock.json"
+    - "**/go.sum"

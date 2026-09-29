@@ -26,7 +26,6 @@ import (
 	"strings"
 
 	"github.com/Bugs5382/golic/internal"
-	"github.com/denormal/go-gitignore"
 	"github.com/enescakir/emoji"
 	"github.com/goccy/go-yaml"
 	"github.com/logrusorgru/aurora"
@@ -227,6 +226,8 @@ func (u *Process) readLocalConfig() (*Config, error) {
 		}
 	}
 
+	rc.Golic.Ignore = append([]string(nil), u.cfgBase.Golic.Ignore...)
+
 	// If the path is empty or file doesn't exist, we return the base copy immediately
 	if u.Opts.ConfigPath == "" {
 		return rc, nil
@@ -252,6 +253,12 @@ func (u *Process) readLocalConfig() (*Config, error) {
 		rc.Golic.Licenses[k] = v
 	}
 
+	// Local ignore patterns add to the built-in list; they never replace it.
+	if len(localCfg.Golic.Ignore) > 0 {
+		log.Debug().Strs("ignore", localCfg.Golic.Ignore).Msg("adding local ignore patterns to the built-in list")
+		rc.Golic.Ignore = append(rc.Golic.Ignore, localCfg.Golic.Ignore...)
+	}
+
 	if localCfg.Golic.MergeRules {
 		// Append or overwrite individual rules
 		for k, v := range localCfg.Golic.Rules {
@@ -265,53 +272,70 @@ func (u *Process) readLocalConfig() (*Config, error) {
 	return rc, nil
 }
 
-// traverseFiles Go through all files in paths and process. Will ignore files and folders that match GitIgnore.
+// traverseFiles walks the tree from ./ and processes every file in scope:
+// not ignored by .licignore or the config ignore list, covered by a rule, and
+// not generated.
 func (u *Process) traverseFiles() error {
 	skipped := 0
 	visited := 0
-	p := func(path string, i gitignore.GitIgnore, o internal.Options, config *Config) (err error) {
-		if !i.Ignore(path) {
-			ruleName := getRule(config, path)
-			if ruleName == "" {
-				return nil
-			}
+	outOfScope := 0
+	generated := 0
+	p := func(path string, o internal.Options, config *Config) (err error) {
+		if reason, out := u.scope.excluded(path); out {
+			log.Trace().Str("path", path).Str("reason", reason).Msg("out of scope")
+			outOfScope++
+			return nil
+		}
+		ruleName := getRule(config, path)
+		if ruleName == "" {
+			log.Trace().Str("path", path).Msg("no rule matches; skipping")
+			return nil
+		}
+		marker, gen, err := isGenerated(path)
+		if err != nil {
+			return err
+		}
+		if gen {
+			log.Debug().Str("path", path).Str("marker", marker).Msg("generated file; skipping")
+			generated++
+			return nil
+		}
 
-			var rule string
-			var skip bool
-			symbol := ""
-			prefix := ""
-			cp := aurora.BrightYellow(path)
+		var rule string
+		var skip bool
+		symbol := ""
+		prefix := ""
+		cp := aurora.BrightYellow(path)
 
-			visited++
+		visited++
 
-			if rule, skip, err = processUpdate(path, o, config); err != nil {
-				return err
-			} else if skip {
-				symbol = "-> skip"
-				cp = aurora.Magenta(path)
-				skipped++
-			}
+		if rule, skip, err = processUpdate(path, o, config); err != nil {
+			return err
+		} else if skip {
+			symbol = "-> skip"
+			cp = aurora.Magenta(path)
+			skipped++
+		}
 
-			if u.Opts.Dry {
-				prefix = aurora.Bold(aurora.Yellow(fmt.Sprintf("%s DRY RUN: ", emoji.TestTube))).String()
-			}
+		if u.Opts.Dry {
+			prefix = aurora.Bold(aurora.Yellow(fmt.Sprintf("%s DRY RUN: ", emoji.TestTube))).String()
+		}
 
-			if log.Debug().Enabled() {
-				log.Info().Msgf("%s %s  %s %s %s",
-					prefix,
-					emoji.Minus,
-					cp,
-					aurora.Bold(aurora.BrightMagenta(symbol)),
-					aurora.Gray(12, fmt.Sprintf("[%s]", rule)),
-				)
-			} else {
-				log.Info().Msgf("%s %s  %s %s",
-					prefix,
-					emoji.Minus,
-					cp,
-					aurora.Bold(aurora.BrightMagenta(symbol)),
-				)
-			}
+		if log.Debug().Enabled() {
+			log.Info().Msgf("%s %s  %s %s %s",
+				prefix,
+				emoji.Minus,
+				cp,
+				aurora.Bold(aurora.BrightMagenta(symbol)),
+				aurora.Gray(12, fmt.Sprintf("[%s]", rule)),
+			)
+		} else {
+			log.Info().Msgf("%s %s  %s %s",
+				prefix,
+				emoji.Minus,
+				cp,
+				aurora.Bold(aurora.BrightMagenta(symbol)),
+			)
 		}
 		return nil
 	}
@@ -321,10 +345,17 @@ func (u *Process) traverseFiles() error {
 			if err != nil {
 				return err
 			}
-			if !info.IsDir() {
-				return p(path, u.ignore, u.Opts, u.cfg)
+			if info.IsDir() {
+				if path == "." {
+					return nil
+				}
+				if pattern, skip := u.scope.skipDir(path); skip {
+					log.Debug().Str("dir", path).Str("ignore", pattern).Msg("not walking an ignored directory")
+					return filepath.SkipDir
+				}
+				return nil
 			}
-			return nil
+			return p(path, u.Opts, u.cfg)
 		})
 
 	if err != nil {
@@ -332,6 +363,7 @@ func (u *Process) traverseFiles() error {
 	}
 
 	u.modified = visited - skipped
+	log.Debug().Int("visited", visited).Int("unchanged", skipped).Int("outOfScope", outOfScope).Int("generated", generated).Msg("walk finished")
 	displaySummary(skipped, visited)
 
 	return nil

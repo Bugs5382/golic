@@ -21,7 +21,8 @@ missing, so treat any change there as breaking.
 - `cmd/golic/` - `main`, the process entry point.
 - `internal/commands/` - the cobra commands and their flags.
 - `internal/impl/` - the file walk, header rendering, config merge, and the embedded default
-  ruleset (`default.golic.yaml`).
+  ruleset (`default.golic.yaml`). `ignore.go` decides which files are in scope (`.licignore` over
+  the config `ignore:` list); `generated.go` skips files with a generated-code marker.
 - `internal/build/` - version reporting: linker values first, then `runtime/debug.ReadBuildInfo`.
 - `internal/` - options, glob matching, the service runner; `internal/logging/` sets up zerolog.
 
@@ -42,6 +43,8 @@ missing, so treat any change there as breaking.
   existing rule's `prefix`/`suffix` in `default.golic.yaml`: every stamped file in every repo would
   get a second header. Adding rules or changing `under` is safe. `TestNoChurnOnFilesStampedByV100`
   replays v1.0.0 output for each rule and fails on any such change.
+- Built-in `ignore:` patterns and the generated-file skip only take files out of scope. Adding a
+  pattern is safe; removing one puts files back in scope in every repo that relies on it.
 - golic builds itself for its license check (`job-go-lic.yaml`); it does not use the hub's shared
   `job-golic`.
 - The Release Manager rewrites the Taskfile `VERSION` and `CHANGELOG.md` on `main`. Leave both to it.

@@ -23,7 +23,6 @@ import (
 	"os"
 
 	"github.com/Bugs5382/golic/internal"
-	"github.com/denormal/go-gitignore"
 	"github.com/enescakir/emoji"
 	"github.com/goccy/go-yaml"
 	"github.com/logrusorgru/aurora"
@@ -36,7 +35,7 @@ type Process struct {
 
 	cfgBase  *Config
 	cfg      *Config
-	ignore   gitignore.GitIgnore
+	scope    *scope
 	modified int
 }
 
@@ -55,11 +54,6 @@ func (u *Process) Run() (err error) {
 	log.Debug().Msgf("%s reading lic ignore path: %s", emoji.OpenBook, u.Opts.LicIgnore)
 	log.Debug().Msgf("%s reading template: %s", emoji.OpenBook, u.Opts.Template)
 	log.Debug().Msgf("%s reading search path: %s", emoji.OpenBook, u.Opts.SearchPath)
-
-	u.ignore, err = gitignore.NewFromFile(u.Opts.LicIgnore)
-	if err != nil {
-		return err
-	}
 
 	if u.cfgBase, err = u.readCommonConfig(); err != nil {
 		return
@@ -86,6 +80,11 @@ func (u *Process) Run() (err error) {
 
 		log.Debug().
 			Msgf("Final Configuration Loaded:\n---\n%s\n---", string(confBytes))
+	}
+
+	log.Debug().Strs("ignore", u.cfg.Golic.Ignore).Msg("config ignore patterns in effect")
+	if u.scope, err = newScope(u.Opts.LicIgnore, u.cfg.Golic.Ignore); err != nil {
+		return err
 	}
 
 	err = u.traverseFiles()
