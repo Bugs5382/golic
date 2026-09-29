@@ -1,5 +1,17 @@
 # Golic Change Log
 
+## v1.0.1 - 2026-09-29
+
+### What Changed 👀
+
+#### 🐛 Bug Fixes
+
+- fix(config): correct XML and shebang placement, match nested Dockerfiles, add missing file types @Bugs5382 (#45)
+
+### Extra
+
+**Full Changelog**: https://github.com/Bugs5382/golic/compare/v1.0.0...v1.0.1
+
 ## v1.0.0 - 2026-09-27
 
 ### What Changed 👀
