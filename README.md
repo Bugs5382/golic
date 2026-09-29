@@ -47,7 +47,28 @@ Determines which files Golic should touch. It uses standard `.gitignore` syntax.
 
 Contains license text and formatting rules. Golic merges your local file with its [embedded master configuration](internal/impl/default.golic.yaml) by default.
 
-Comment rules for common languages are **built in** — including Go, YAML, shell, and TypeScript/JavaScript (`.ts`, `.tsx`, `.mts`, `.cts`, `.js`, `.jsx`, `.mjs`, `.cjs`, which use a `/* … */` block). You only need a local `rules:` entry for unusual file types or to override a built-in. Which files are processed is controlled separately by `.licignore`, so to stamp TypeScript sources you just allow them there (e.g. `!*.ts`).
+Comment rules for common file types are **built in**. You only need a local `rules:` entry for unusual file types or to override a built-in. Which files are processed is controlled separately by `.licignore`, so to stamp TypeScript sources you just allow them there (e.g. `!*.ts`).
+
+| Comment style | Built-in file types |
+| :--- | :--- |
+| `/* … */` | `.go` (below `package`), `.java`, `.scala`, `.cs`, `.kt`, `.swift`, `.rs`, `.c`, `.h`, `.cpp`, `.proto`, `.js`, `.jsx`, `.mjs`, `.cjs`, `.ts`, `.tsx`, `.mts`, `.cts`, `.css`, `.scss`, `.less` |
+| `# ` | `.yaml`, `.yml`, `.toml`, `.hcl`, `.tf`, `.tfvars`, `.graphql`, `.graphqls`, `.py`, `.sh`, `.bash`, `.zsh`, `.gitignore`, `.dockerignore`, `.helmignore`, `.licignore`, `Dockerfile*`, `Containerfile*`, `Makefile`, `.mk` |
+| `-- ` | `.sql` |
+| `<!-- … -->` | `.html`, `.xml`, `.svg` |
+| `{{/* … */}}` | `.tpl` |
+
+`Dockerfile*`, `Containerfile*` and `Makefile` match at any depth, so `build/Dockerfile` and `sub/Makefile` are covered too.
+
+The header always goes below the lines a file needs first:
+
+* 🐚 **Shebangs:** a `#!` first line in shell, Python, JavaScript and TypeScript files stays on line 1, whatever the interpreter path (`#!/usr/bin/env node`, `#!/usr/local/bin/bash`, `#!/bin/sh`).
+* 📄 **XML declarations:** `<?xml … ?>` stays first in `.xml` and `.svg` files.
+* 🐳 **Dockerfile parser directives:** `# syntax=`, `# escape=` and `# check=` stay above the header, so BuildKit still reads them.
+
+JSON, Markdown and MDX have no built-in rule on purpose: JSON has no comments, and a header in Markdown shows up in the rendered page.
+
+> [!WARNING]
+> A header in a `.sql` file changes its checksum. Migration tools that checksum applied files, such as Atlas (`atlas.sum`) and Flyway, will report already-applied migrations as modified. Keep migration folders out of `.licignore`, or stamp them before they are first applied.
 
 ```yaml
 # .golic.yaml 
@@ -63,10 +84,44 @@ golic:
       suffix: "*/"
     "technitium/**/*.yaml":
       prefix: "{{/*"
-      suffix: "/*}}"
+      suffix: "*/}}"
     .mzm:
       prefix: "" # No indent/prefix; place text directly at top
 ```
+
+A rule key is a file extension (`.go`) or a glob matched against the file path relative to the directory golic runs in (`"**/Dockerfile*"`). When several keys match a file, the longest key wins. A rule has three fields:
+
+* `prefix`: starts every header line, or opens the block when `suffix` is set.
+* `suffix`: closes a block comment. Leave it out for line comments.
+* `under`: line patterns the header goes below, for example `"package *"` or `"#!/**"`. The first pattern that matches wins, and the lines right after it that match any pattern stay above the header too. Patterns starting with `#!` only match the first line.
+
+> [!IMPORTANT]
+> Golic recognises a header it wrote by its exact text. Changing the `prefix` or `suffix` of a rule you have already stamped with makes every file look unstamped, and the next run adds a second header. Changing `under` is safe.
+
+#### Merging with the built-in rules (`mergeRules`)
+
+`mergeRules` decides how the `rules:` in your `.golic.yaml` combine with the built-in rules. Licenses always merge, whatever it is set to.
+
+* **`true` (the default):** your rules are added to the built-in set. A rule with the same key as a built-in replaces that built-in rule as a whole; fields are not merged, so an override of `.sh` that leaves out `under` no longer keeps the shebang first.
+* **`false`:** your rules **replace the built-in set entirely**. Only the keys you list exist. Every other file type has no rule and is **skipped without a warning**, even when `.licignore` allows it. If you set `mergeRules: false` and list no rules at all, the built-in set is kept.
+
+With `mergeRules: false` you have to list every rule you need. This config stamps Go and YAML files and nothing else; shell scripts, Dockerfiles and TypeScript are silently skipped:
+
+```yaml
+# .golic.yaml
+golic:
+  mergeRules: false
+  rules:
+    .go:
+      prefix: "\n/*"
+      suffix: "*/"
+      under:
+        - "package *"
+    .yaml:
+      prefix: "# "
+```
+
+To keep a type covered, copy its rule from the [embedded master configuration](internal/impl/default.golic.yaml) byte for byte, so files you already stamped are still recognised.
 
 ## 🛠️ Usage
 

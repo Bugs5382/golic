@@ -38,6 +38,10 @@ missing, so treat any change there as breaking.
 - See `CLAUDE.md` for the branch/commit/PR rules; they are enforced by the git hooks in
   `.claude/hooks` (run `bash .claude/hooks/install.sh` once per clone).
 - Open every PR as a draft. CI skips drafts, so run the full checks locally, push once they pass, and mark the PR ready when the work is finished; see CLAUDE.md "CI and Actions minutes".
+- golic finds its own header by the exact rendered text. Never edit existing license text or an
+  existing rule's `prefix`/`suffix` in `default.golic.yaml`: every stamped file in every repo would
+  get a second header. Adding rules or changing `under` is safe. `TestNoChurnOnFilesStampedByV100`
+  replays v1.0.0 output for each rule and fails on any such change.
 - golic builds itself for its license check (`job-go-lic.yaml`); it does not use the hub's shared
   `job-golic`.
 - The Release Manager rewrites the Taskfile `VERSION` and `CHANGELOG.md` on `main`. Leave both to it.

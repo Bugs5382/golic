@@ -421,30 +421,61 @@ func getCommentedLicense(config *Config, o internal.Options, file string) (strin
 	return content, nil
 }
 
-// splitSource Split Source
+// splitSource splits source into the lines that must stay above the license
+// (the header) and the rest (the footer), using a rule's "under" patterns.
+// Patterns are tried in order; the first one that matches a line ends the
+// header at that line. Lines right after it that match any of the patterns
+// join the header too, so a run of directives (Dockerfile "# syntax=" and
+// "# escape=", in either order) stays together above the license.
 func splitSource(source string, rules []string) (header, footer string) {
 	lines := strings.Split(source, "\n")
 	if len(rules) == 0 {
 		return "", source
 	}
 	for _, r := range rules {
-		header, footer = findHeaderAndFooter(lines, r)
+		header, footer = findHeaderAndFooter(lines, r, rules)
 		if header != "" {
+			log.Trace().Str("under", r).Int("headerLines", strings.Count(header, "\n")+1).Msg("license goes below a matched line")
 			return
 		}
 	}
+	log.Trace().Strs("under", rules).Msg("no under pattern matched; license goes at the top")
 	return
 }
 
-func findHeaderAndFooter(lines []string, match string) (header, footer string) {
+func findHeaderAndFooter(lines []string, match string, all []string) (header, footer string) {
 	for i, l := range lines {
-		if internal.IsMatch(l, match) {
-			header = strings.Join(lines[0:i+1], "\n")
-			footer = strings.Join(lines[i+1:], "\n")
+		if underMatch(i, l, match) {
+			end := i + 1
+			for end < len(lines) && anyUnderMatch(end, lines[end], all) {
+				end++
+			}
+			header = strings.Join(lines[0:end], "\n")
+			footer = strings.Join(lines[end:], "\n")
 			return
 		}
 	}
 	return "", strings.Join(lines, "\n")
+}
+
+// underMatch reports whether line number i matches an "under" pattern. A
+// shebang only means something on the first line, so patterns starting with
+// "#!" never match further down (a heredoc or template literal that happens
+// to hold one).
+func underMatch(i int, line, pattern string) bool {
+	if i > 0 && strings.HasPrefix(pattern, "#!") {
+		return false
+	}
+	return internal.IsMatch(line, pattern)
+}
+
+func anyUnderMatch(i int, line string, patterns []string) bool {
+	for _, p := range patterns {
+		if underMatch(i, line, p) {
+			return true
+		}
+	}
+	return false
 }
 
 // getRule Get Rule for Match

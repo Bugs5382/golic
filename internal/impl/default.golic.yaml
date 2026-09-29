@@ -269,27 +269,39 @@ golic:
     .js:
       prefix: "/*"
       suffix: "*/"
+      under:
+        - "#!/**"
     .jsx:
       prefix: "/*"
       suffix: "*/"
     .mjs:
       prefix: "/*"
       suffix: "*/"
+      under:
+        - "#!/**"
     .cjs:
       prefix: "/*"
       suffix: "*/"
+      under:
+        - "#!/**"
     .ts:
       prefix: "/*"
       suffix: "*/"
+      under:
+        - "#!/**"
     .tsx:
       prefix: "/*"
       suffix: "*/"
     .mts:
       prefix: "/*"
       suffix: "*/"
+      under:
+        - "#!/**"
     .cts:
       prefix: "/*"
       suffix: "*/"
+      under:
+        - "#!/**"
     .css:
       prefix: "/*"
       suffix: "*/"
@@ -299,7 +311,30 @@ golic:
       prefix: "# "
     Dockerfile*:
       prefix: "# "
+      under:
+        - "# syntax=*"
+        - "# syntax=*/**"
+        - "# escape=*"
+        - "# check=*"
     Makefile:
+      prefix: "# "
+    "**/Dockerfile*":
+      prefix: "# "
+      under:
+        - "# syntax=*"
+        - "# syntax=*/**"
+        - "# escape=*"
+        - "# check=*"
+    "**/Containerfile*":
+      prefix: "# "
+      under:
+        - "# syntax=*"
+        - "# syntax=*/**"
+        - "# escape=*"
+        - "# check=*"
+    "**/Makefile":
+      prefix: "# "
+    .mk:
       prefix: "# "
     .gitignore:
       prefix: "# "
@@ -313,10 +348,69 @@ golic:
     .sh:
       prefix: "# "
       under:
-        - "#!/usr/bin/*"
-        - "#!/bin/*"
+        - "#!/**"
     .xml:
       prefix: "<!--"
       suffix: "-->"
       under:
-        - "<?xml"
+        - "<?xml*"
+    .svg:
+      prefix: "<!--"
+      suffix: "-->"
+      under:
+        - "<?xml*"
+    .py:
+      prefix: "# "
+      under:
+        - "#!/**"
+    .bash:
+      prefix: "# "
+      under:
+        - "#!/**"
+    .zsh:
+      prefix: "# "
+      under:
+        - "#!/**"
+    .toml:
+      prefix: "# "
+    .hcl:
+      prefix: "# "
+    .tfvars:
+      prefix: "# "
+    .graphql:
+      prefix: "# "
+    .graphqls:
+      prefix: "# "
+    .dockerignore:
+      prefix: "# "
+    .helmignore:
+      prefix: "# "
+    .sql:
+      prefix: "-- "
+    .proto:
+      prefix: "/*"
+      suffix: "*/"
+    .scss:
+      prefix: "/*"
+      suffix: "*/"
+    .less:
+      prefix: "/*"
+      suffix: "*/"
+    .rs:
+      prefix: "/*"
+      suffix: "*/"
+    .c:
+      prefix: "/*"
+      suffix: "*/"
+    .h:
+      prefix: "/*"
+      suffix: "*/"
+    .cpp:
+      prefix: "/*"
+      suffix: "*/"
+    .kt:
+      prefix: "/*"
+      suffix: "*/"
+    .swift:
+      prefix: "/*"
+      suffix: "*/"
