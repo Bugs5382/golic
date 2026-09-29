@@ -3,13 +3,12 @@ module github.com/Bugs5382/golic
 go 1.26.1
 
 require (
-	github.com/Bugs5382/go-log v1.2.2
+	github.com/Bugs5382/go-log v1.3.0
 	github.com/bmatcuk/doublestar/v4 v4.10.0
 	github.com/denormal/go-gitignore v0.0.0-20180930084346-ae8ad1d07817
 	github.com/enescakir/emoji v1.0.0
 	github.com/goccy/go-yaml v1.19.2
 	github.com/logrusorgru/aurora v2.0.3+incompatible
-	github.com/rs/zerolog v1.35.1
 	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.11.1
 )
@@ -22,6 +21,7 @@ require (
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.21 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/rs/zerolog v1.35.1 // indirect
 	github.com/spf13/pflag v1.0.10 // indirect
 	go.opentelemetry.io/otel v1.44.0 // indirect
 	go.opentelemetry.io/otel/trace v1.44.0 // indirect

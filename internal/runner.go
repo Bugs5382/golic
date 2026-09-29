@@ -19,6 +19,9 @@ limitations under the License.
 */
 
 import (
+	"fmt"
+
+	golog "github.com/Bugs5382/go-log"
 	"github.com/Bugs5382/golic/internal/logging"
 	"github.com/enescakir/emoji"
 )
@@ -45,15 +48,15 @@ func Command(service Service) *ServiceRunner {
 // MustRun runs the service once. It returns the run error, or the
 // *ChangesError from Changes when the run succeeded but files need a change.
 func (r *ServiceRunner) MustRun() error {
-	logging.L().Info().Msgf("%s command %s started", emoji.Tractor, r.service)
+	logging.L().Info(fmt.Sprintf("%s command %s started", emoji.Tractor, r.service))
 	if err := r.service.Run(); err != nil {
-		logging.L().Error().Err(err).Msgf("%s command %s failed", emoji.Bomb, r.service)
+		logging.L().Error(err, fmt.Sprintf("%s command %s failed", emoji.Bomb, r.service))
 		return err
 	}
 	if err := r.service.Changes(); err != nil {
-		logging.L().Debug().Err(err).Msgf("command %s finished with changes", r.service)
+		logging.L().Debug(fmt.Sprintf("command %s finished with changes", r.service), golog.F("error", err.Error()))
 		return err
 	}
-	logging.L().Debug().Msgf("command %s finished clean", r.service)
+	logging.L().Debug(fmt.Sprintf("command %s finished clean", r.service))
 	return nil
 }

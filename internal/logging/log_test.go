@@ -21,6 +21,9 @@ limitations under the License.
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
+	"io"
+	"os"
 	"strings"
 	"testing"
 
@@ -35,8 +38,8 @@ func TestBuildLevels(t *testing.T) {
 		var buf bytes.Buffer
 
 		l := build(true, &buf)
-		l.Trace().Msg("trace line")
-		l.Debug().Msg("debug line")
+		l.Trace("trace line")
+		l.Debug("debug line")
 
 		assert.Contains(t, buf.String(), "trace line")
 		assert.Contains(t, buf.String(), "debug line")
@@ -48,9 +51,9 @@ func TestBuildLevels(t *testing.T) {
 		var buf bytes.Buffer
 
 		l := build(false, &buf)
-		l.Trace().Msg("trace line")
-		l.Debug().Msg("debug line")
-		l.Info().Msg("info line")
+		l.Trace("trace line")
+		l.Debug("debug line")
+		l.Info("info line")
 
 		assert.NotContains(t, buf.String(), "trace line")
 		assert.NotContains(t, buf.String(), "debug line")
@@ -63,9 +66,9 @@ func TestBuildLevels(t *testing.T) {
 		var buf bytes.Buffer
 
 		l := build(true, &buf)
-		l.Trace().Msg("trace line")
-		l.Info().Msg("info line")
-		l.Warn().Msg("warn line")
+		l.Trace("trace line")
+		l.Info("info line")
+		l.Warn("warn line")
 
 		assert.NotContains(t, buf.String(), "trace line")
 		assert.NotContains(t, buf.String(), "info line")
@@ -78,7 +81,7 @@ func TestBuildLevels(t *testing.T) {
 		var buf bytes.Buffer
 
 		l := build(true, &buf)
-		l.Trace().Msg("trace line")
+		l.Trace("trace line")
 
 		assert.Contains(t, buf.String(), "trace line")
 	})
@@ -91,7 +94,7 @@ func TestBuildFormat(t *testing.T) {
 		var buf bytes.Buffer
 
 		l := build(false, &buf)
-		l.Info().Msg("hello")
+		l.Info("hello")
 
 		out := buf.String()
 		assert.Contains(t, out, "INF")
@@ -105,7 +108,7 @@ func TestBuildFormat(t *testing.T) {
 		var buf bytes.Buffer
 
 		l := build(false, &buf)
-		l.Info().Msg("hello")
+		l.Info("hello")
 
 		var line map[string]any
 		require.NoError(t, json.Unmarshal(buf.Bytes(), &line))
@@ -116,7 +119,43 @@ func TestBuildFormat(t *testing.T) {
 }
 
 func TestInitUnderTestIsSilent(t *testing.T) {
+	t.Setenv("LOG_LEVEL", "trace")
+	r, w, err := os.Pipe()
+	require.NoError(t, err)
+	stderr := os.Stderr
+	os.Stderr = w
+	t.Cleanup(func() { os.Stderr = stderr })
+
 	Init(true)
-	assert.False(t, L().Trace().Enabled())
-	assert.False(t, L().Error().Enabled())
+	L().Trace("trace line")
+	L().Error(errors.New("boom"), "error line")
+	require.NoError(t, w.Close())
+
+	out, err := io.ReadAll(r)
+	require.NoError(t, err)
+	assert.Empty(t, string(out))
+	assert.False(t, DebugEnabled())
+}
+
+func TestDebugOn(t *testing.T) {
+	cases := []struct {
+		name     string
+		level    string
+		verbose  bool
+		expected bool
+	}{
+		{"default is info", "", false, false},
+		{"verbose is trace", "", true, true},
+		{"LOG_LEVEL debug wins over the default", "debug", false, true},
+		{"LOG_LEVEL is case-insensitive", "TRACE", false, true},
+		{"LOG_LEVEL info wins over verbose", "info", true, false},
+		{"an unknown LOG_LEVEL falls back to verbose", "loud", true, true},
+		{"an unknown LOG_LEVEL falls back to info", "loud", false, false},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			t.Setenv("LOG_LEVEL", c.level)
+			assert.Equal(t, c.expected, debugOn(c.verbose))
+		})
+	}
 }

@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"runtime/debug"
 
+	golog "github.com/Bugs5382/go-log"
 	"github.com/Bugs5382/golic/internal/logging"
 )
 
@@ -70,30 +71,30 @@ func resolve(ldVersion, ldCommit string, bi *debug.BuildInfo, ok bool) (version,
 	version, commit = ldVersion, ldCommit
 
 	if version != "" {
-		logging.L().Debug().Str("version", version).Msg("version taken from the linker flags")
+		logging.L().Debug("version taken from the linker flags", golog.F("version", version))
 	}
 
 	if ok && bi != nil {
 		if version == "" {
 			switch bi.Main.Version {
 			case "", Devel:
-				logging.L().Debug().Str("module_version", bi.Main.Version).Msg("build info has no release version")
+				logging.L().Debug("build info has no release version", golog.F("module_version", bi.Main.Version))
 			default:
 				version = bi.Main.Version
-				logging.L().Debug().Str("version", version).Msg("version taken from the module build info")
+				logging.L().Debug("version taken from the module build info", golog.F("version", version))
 			}
 		}
 		if commit == "" {
 			commit = vcsRevision(bi)
 		}
 	} else {
-		logging.L().Debug().Msg("no build info available")
+		logging.L().Debug("no build info available")
 	}
 
 	if version == "" {
 		version = Devel
 	}
-	logging.L().Trace().Str("version", version).Str("commit", commit).Msg("version resolved")
+	logging.L().Trace("version resolved", golog.F("version", version), golog.F("commit", commit))
 	return version, commit
 }
 
@@ -106,7 +107,7 @@ func vcsRevision(bi *debug.BuildInfo) string {
 		if len(rev) > shortCommitLen {
 			rev = rev[:shortCommitLen]
 		}
-		logging.L().Trace().Str("commit", rev).Msg("commit taken from the vcs build setting")
+		logging.L().Trace("commit taken from the vcs build setting", golog.F("commit", rev))
 		return rev
 	}
 	return ""

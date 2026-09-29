@@ -294,7 +294,7 @@ golic logs through [go-log](https://github.com/Bugs5382/go-log). Logs go to stde
 | Variable | Effect |
 |---|---|
 | `LOG_LEVEL` | `trace`, `debug`, `info`, `warn`, `error` or `disabled`. When set to a valid level it wins over `-v`. Unset: `info`, or `trace` with `-v`. |
-| `LOG_FORMAT` | `json` for one JSON object per line. Anything else, or unset, gives readable console text. |
+| `LOG_FORMAT` | `json` for one JSON object per line, `both` for JSON plus console text (both on stderr). Anything else, or unset, gives readable console text. |
 
 ## 🔒 Stability
 

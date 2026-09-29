@@ -25,9 +25,9 @@ missing, so treat any change there as breaking.
   the config `ignore:` list); `generated.go` skips files with a generated-code marker.
 - `internal/build/` - version reporting: linker values first, then `runtime/debug.ReadBuildInfo`.
 - `internal/` - options, glob matching, the service runner; `internal/logging/` builds the logger on
-  `github.com/Bugs5382/go-log` and every package logs through `logging.L()`. Do not import
-  `rs/zerolog/log` or call `zerolog.SetGlobalLevel` elsewhere; `logging` is the only package that
-  touches zerolog (for the stderr console writer and the `-v` trace level).
+  `github.com/Bugs5382/go-log`'s neutral `TraceLogger`, and every package logs through
+  `logging.L()` with `golog.F` fields. Do not import `github.com/rs/zerolog` anywhere; it is only
+  an indirect dependency of go-log. Use `logging.DebugEnabled()` to guard costly debug output.
 
 ## Build, test, lint
 

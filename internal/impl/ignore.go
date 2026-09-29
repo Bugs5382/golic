@@ -24,6 +24,7 @@ import (
 	"regexp"
 	"strings"
 
+	golog "github.com/Bugs5382/go-log"
 	"github.com/Bugs5382/golic/internal/logging"
 
 	"github.com/bmatcuk/doublestar/v4"
@@ -58,10 +59,10 @@ type lift struct {
 
 // newScope reads the .licignore at path and pairs it with the config ignores.
 func newScope(path string, patterns []string) (*scope, error) {
-	logging.L().Debug().Str("licignore", path).Int("ignorePatterns", len(patterns)).Msg("building the file scope")
+	logging.L().Debug("building the file scope", golog.F("licignore", path), golog.F("ignorePatterns", len(patterns)))
 	gi, err := gitignore.NewFromFile(path)
 	if err != nil {
-		logging.L().Debug().Err(err).Str("licignore", path).Msg("reading .licignore failed")
+		logging.L().Debug("reading .licignore failed", golog.F("licignore", path), golog.F("error", err.Error()))
 		return nil, err
 	}
 	raw, err := os.ReadFile(path) // #nosec G304 -- the .licignore the user pointed golic at
@@ -82,10 +83,10 @@ func newScope(path string, patterns []string) (*scope, error) {
 		}
 		pattern := strings.TrimPrefix(line, "!")
 		if isCatchAll(pattern, patterns) {
-			logging.L().Trace().Str("line", line).Msg(".licignore negation is a catch-all; it does not lift built-in ignores")
+			logging.L().Trace(".licignore negation is a catch-all; it does not lift built-in ignores", golog.F("line", line))
 			continue
 		}
-		logging.L().Debug().Str("line", line).Msg(".licignore negation lifts built-in ignores for the paths it matches")
+		logging.L().Debug(".licignore negation lifts built-in ignores for the paths it matches", golog.F("line", line))
 		s.lifts = append(s.lifts, lift{line: line, matcher: gitignore.New(strings.NewReader(pattern), base, nil)})
 	}
 	return s, nil
@@ -117,7 +118,7 @@ func (s *scope) excluded(path string) (reason string, out bool) {
 	}
 	for _, l := range s.lifts {
 		if l.matcher.Match(path) != nil {
-			logging.L().Debug().Str("path", path).Str("ignore", pattern).Str("licignore", l.line).Msg("built-in ignore lifted by .licignore")
+			logging.L().Debug("built-in ignore lifted by .licignore", golog.F("path", path), golog.F("ignore", pattern), golog.F("licignore", l.line))
 			return "", false
 		}
 	}

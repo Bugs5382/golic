@@ -25,6 +25,7 @@ import (
 	"regexp"
 	"strings"
 
+	golog "github.com/Bugs5382/go-log"
 	"github.com/Bugs5382/golic/internal/logging"
 )
 
@@ -64,7 +65,7 @@ func generatedMarker(head []byte) (string, bool) {
 		l = strings.TrimSpace(l)
 		for _, re := range generatedMarkers {
 			if re.MatchString(l) {
-				logging.L().Trace().Int("line", i+1).Str("marker", re.String()).Msg("generated-code marker found")
+				logging.L().Trace("generated-code marker found", golog.F("line", i+1), golog.F("marker", re.String()))
 				return l, true
 			}
 		}
@@ -77,7 +78,7 @@ func generatedMarker(head []byte) (string, bool) {
 func isGenerated(path string) (string, bool, error) {
 	f, err := os.Open(path) // #nosec G304 -- path comes from the working-tree walk
 	if err != nil {
-		logging.L().Debug().Err(err).Str("path", path).Msg("opening file for the generated-code check failed")
+		logging.L().Debug("opening file for the generated-code check failed", golog.F("path", path), golog.F("error", err.Error()))
 		return "", false, err
 	}
 	defer func() { _ = f.Close() }()
@@ -85,7 +86,7 @@ func isGenerated(path string) (string, bool, error) {
 	buf := make([]byte, generatedScanBytes)
 	n, err := io.ReadFull(f, buf)
 	if err != nil && err != io.EOF && err != io.ErrUnexpectedEOF {
-		logging.L().Debug().Err(err).Str("path", path).Msg("reading file head for the generated-code check failed")
+		logging.L().Debug("reading file head for the generated-code check failed", golog.F("path", path), golog.F("error", err.Error()))
 		return "", false, err
 	}
 	marker, ok := generatedMarker(bytes.TrimPrefix(buf[:n], []byte("\xef\xbb\xbf")))

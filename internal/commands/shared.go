@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"os"
 
+	golog "github.com/Bugs5382/go-log"
 	"github.com/Bugs5382/golic/internal"
 	"github.com/Bugs5382/golic/internal/impl"
 	"github.com/Bugs5382/golic/internal/logging"
@@ -50,7 +51,7 @@ func setupAndValidate(cmd *cobra.Command, opts *internal.Options) error {
 	// wrong directory would stamp the whole tree.
 	if opts.LicIgnore != "" {
 		if _, err := os.Stat(opts.LicIgnore); os.IsNotExist(err) {
-			logging.L().Debug().Str("licignore", opts.LicIgnore).Msg(".licignore missing; refusing to run")
+			logging.L().Debug(".licignore missing; refusing to run", golog.F("licignore", opts.LicIgnore))
 			return fmt.Errorf("ignore file not found: %s. golic needs a .licignore to scope a run, so it never stamps a whole tree by accident. Create it (an empty file uses only the built-in ignores) or point -l at one", opts.LicIgnore)
 		}
 	}
