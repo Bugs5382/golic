@@ -43,5 +43,6 @@ func InjectCmd() *cobra.Command {
 
 	// flags
 	addCommonFlags(injectCmd, &opts)
+	addLicenseFileFlag(injectCmd, &opts)
 	return injectCmd
 }

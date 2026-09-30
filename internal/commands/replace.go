@@ -43,5 +43,6 @@ func ReplaceCmd() *cobra.Command {
 
 	// flags
 	addCommonFlags(replaceCmd, &opts)
+	addLicenseFileFlag(replaceCmd, &opts)
 	return replaceCmd
 }

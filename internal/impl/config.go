@@ -18,6 +18,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+import "fmt"
+
 // Rule says how a license header is written for the files a rule key matches.
 type Rule struct {
 	// Prefix starts every header line, or opens the block when Suffix is set.
@@ -50,6 +52,41 @@ type GolicConfig struct {
 	// A local .golic.yaml adds to it. A specific "!" line in .licignore can
 	// lift an entry for the paths it names.
 	Ignore []string `yaml:"ignore"`
+	// LicenseFile turns on writing the full licence text: true for LICENSE,
+	// or a path. The --license-file flag wins over it.
+	LicenseFile LicenseFileSetting `yaml:"licenseFile"`
+}
+
+// LicenseFileSetting is the licenseFile config value, a bool or a path.
+type LicenseFileSetting struct {
+	Path string
+}
+
+// UnmarshalYAML accepts true (LICENSE), false (off) or a path.
+func (l *LicenseFileSetting) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	var v interface{}
+	if err := unmarshal(&v); err != nil {
+		return err
+	}
+	switch x := v.(type) {
+	case nil:
+		l.Path = ""
+	case bool:
+		l.Path = ""
+		if x {
+			l.Path = defaultLicenseFile
+		}
+	case string:
+		l.Path = x
+	default:
+		return fmt.Errorf("licenseFile must be true, false or a path, got %v", v)
+	}
+	return nil
+}
+
+// MarshalYAML writes the setting back as the path, for the debug config dump.
+func (l LicenseFileSetting) MarshalYAML() (interface{}, error) {
+	return l.Path, nil
 }
 
 type Config struct {

@@ -229,6 +229,7 @@ func (u *Process) readLocalConfig() (*Config, error) {
 	}
 
 	rc.Golic.Ignore = append([]string(nil), u.cfgBase.Golic.Ignore...)
+	rc.Golic.LicenseFile = u.cfgBase.Golic.LicenseFile
 
 	// If the path is empty or file doesn't exist, we return the base copy immediately
 	if u.Opts.ConfigPath == "" {
@@ -259,6 +260,10 @@ func (u *Process) readLocalConfig() (*Config, error) {
 	if len(localCfg.Golic.Ignore) > 0 {
 		logging.L().Debug("adding local ignore patterns to the built-in list", golog.F("ignore", localCfg.Golic.Ignore))
 		rc.Golic.Ignore = append(rc.Golic.Ignore, localCfg.Golic.Ignore...)
+	}
+
+	if localCfg.Golic.LicenseFile.Path != "" {
+		rc.Golic.LicenseFile = localCfg.Golic.LicenseFile
 	}
 
 	if localCfg.Golic.MergeRules {
