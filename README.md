@@ -318,13 +318,13 @@ task lint
 
 `task lint` stamps missing license headers first, using the binary from `task build`.
 
-To verify only the project licenses without changing any files (exit 1 when a header is missing), use:
+To verify only the project licenses without changing any files (exit 1 when a header is missing or `LICENSE` is not the official Apache text), use:
 
 ```bash
 task license-dry
 ```
 
-To add any missing headers, run `task license`.
+To add any missing headers and rewrite `LICENSE`, run `task license`.
 
 ### Test
 

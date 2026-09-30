@@ -35,4 +35,4 @@ jobs:
           go build -o ./bin/golic ./cmd/golic
           # -x exits 1 when a header is missing, so the job fails instead of
           # only logging it. Errors exit 2.
-          ./bin/golic inject -c "2026 Shane & Contributors" -t apache2 -d -x
+          ./bin/golic inject -c "2026 Shane & Contributors" -t apache2 -d -x --license-file
