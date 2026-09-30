@@ -178,7 +178,7 @@ golic inject -t apacheX
 
 ### Updating or Removing
 
-**Update in one pass** with `replace` — it strips the existing license header and injects the configured one, so you can change the copyright holder, year, or license type without a separate remove step:
+**Update in one pass** with `replace` — it swaps the header golic wrote for the configured one, so you can change the copyright holder, year, or license type without a separate remove step:
 
 ```bash
 # Preview first, then apply
@@ -186,7 +186,14 @@ golic replace -c "2026 MyCompany ltd." -t apacheX --dry
 golic replace -c "2026 MyCompany ltd." -t apacheX
 ```
 
-`replace` is a no-op when a file already carries the exact target header, and honors `--dry` and `-x` like `inject`.
+`replace` looks for a header golic itself rendered: any license in the config (built-in or local), written for the file's comment style, with any copyright value. It swaps that exact text in place and keeps everything around it, so comments below the header, blank lines, shebangs and XML declarations stay as they were. For each file:
+
+* 🔁 **A golic header:** swapped for the configured one, in place.
+* ✅ **Already the target header:** left alone and not counted as a change.
+* ➕ **No header:** stamped exactly as `inject` would.
+* 🛑 **Some other license header** (a leading comment that mentions a copyright or license but is not golic's text): left alone and logged as a warning, never stripped. Fix those by hand, or `remove` them with the license that wrote them.
+
+`replace` honors `--dry` and `-x` like `inject`, and a second run changes nothing.
 
 **Remove** headers entirely with:
 
