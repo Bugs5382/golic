@@ -13,10 +13,6 @@
 - fix(licenses): make every built-in template the official notice text @Bugs5382 (#54)
 - fix(replace): swap only golic's own header and keep the file's other comments and spacing @Bugs5382 (#50)
 
-#### ⚠️ Changes
-
-- fix(licenses): make every built-in template the official notice text @Bugs5382 (#54)
-
 ### Extra
 
 **Full Changelog**: https://github.com/Bugs5382/golic/compare/v1.1.0...v1.2.0
