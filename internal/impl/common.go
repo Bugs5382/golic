@@ -1,8 +1,6 @@
 package impl
 
 /*
-Apache License 2.0
-
 Copyright 2026 Shane & Contributors
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -44,6 +42,16 @@ func injectFile(path string, o internal.Options, config *Config) (rule string, s
 	if err != nil {
 		return "", false, err
 	}
+	olds, err := supersededHeaders(config, o, rule)
+	if err != nil {
+		return "", false, err
+	}
+	for _, old := range olds {
+		if strings.Contains(source, old) {
+			logging.L().Warn("file carries an earlier golic text of this license; run golic replace to update it", golog.F("path", path), golog.F("template", o.Template))
+			return rule, true, nil
+		}
+	}
 	// license is injected, continue
 	if strings.Contains(source, license) {
 		return rule, true, nil
@@ -76,6 +84,18 @@ func removeFile(path string, o internal.Options, config *Config) (rule string, s
 	license, err := getCommentedLicense(config, o, rule)
 	if err != nil {
 		return rule, false, err
+	}
+	olds, err := supersededHeaders(config, o, rule)
+	if err != nil {
+		return rule, false, err
+	}
+	// An earlier text can contain the current one (a line-comment header that
+	// only lost its title), so it is checked first.
+	for _, old := range olds {
+		if strings.Contains(source, old) {
+			logging.L().Debug("removing an earlier golic text of this license", golog.F("path", path), golog.F("template", o.Template))
+			return "", false, RemoveFromFile(path, o, source, old, err)
+		}
 	}
 	if strings.Contains(source, license) {
 		return "", false, RemoveFromFile(path, o, source, license, err)
@@ -374,18 +394,36 @@ func matchRule(config *Config, path string) (rule string, ok bool) {
 
 // getCommentedLicense Get Commented License File
 func getCommentedLicense(config *Config, o internal.Options, file string) (string, error) {
-	var ok bool
-	var template string
-	var rule string
-	if template, ok = config.Golic.Licenses[o.Template]; !ok {
+	template, ok := config.Golic.Licenses[o.Template]
+	if !ok {
 		return "", fmt.Errorf("no license found for %s, check configuration (.golic.yaml)", o.Template)
 	}
+	return renderHeader(config, template, o.Copyright, file)
+}
 
-	//if _, ok =  config.Golic.Rules[rule]; !ok {
-	if rule, ok = matchRule(config, file); !ok {
+// supersededHeaders renders the earlier built-in texts of the chosen license
+// for file, newest first.
+func supersededHeaders(config *Config, o internal.Options, file string) ([]string, error) {
+	olds := supersededLicenses[o.Template]
+	out := make([]string, 0, len(olds))
+	for _, text := range olds {
+		h, err := renderHeader(config, text, o.Copyright, file)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, h)
+	}
+	return out, nil
+}
+
+// renderHeader writes a license text as a comment in the style of the rule
+// that matches file.
+func renderHeader(config *Config, template, copyright, file string) (string, error) {
+	rule, ok := matchRule(config, file)
+	if !ok {
 		return "", fmt.Errorf("no rule found for %s, check configuration (.golic.yaml)", rule)
 	}
-	template = strings.ReplaceAll(template, "{{copyright}}", o.Copyright)
+	template = strings.ReplaceAll(template, "{{copyright}}", copyright)
 	if config.IsWrapped(rule) {
 		return fmt.Sprintf("%s\n%s%s\n",
 				config.Golic.Rules[rule].Prefix,
