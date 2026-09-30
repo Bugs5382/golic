@@ -1,5 +1,21 @@
 # Golic Change Log
 
+## v1.1.0 - 2026-09-30
+
+### What Changed 👀
+
+#### 🚀 Features
+
+- feat(config): ignore generated and vendored files by default @Bugs5382 (#47)
+
+#### 🐛 Bug Fixes
+
+- fix(config): correct XML and shebang placement, match nested Dockerfiles, add missing file types @Bugs5382 (#45)
+
+### Extra
+
+**Full Changelog**: https://github.com/Bugs5382/golic/compare/v1.0.0...v1.1.0
+
 ## v1.0.1 - 2026-09-29
 
 ### What Changed 👀
