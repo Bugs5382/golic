@@ -268,7 +268,12 @@ From v1.2 every built-in license is the official text, byte for byte: the per-fi
 
 Files stamped by an older golic keep working. golic still recognises the earlier texts:
 
-* 🧷 **`inject`** treats a file with an earlier text as stamped. It never adds a second header, so `inject --dry -x` in CI keeps passing, and it logs a warning for each file that still has the earlier text.
+* 🧷 **`inject`** treats a file with an earlier text as stamped. It never adds a second header, so `inject --dry -x` in CI keeps passing. At the end of the run, dry or not, it logs one warning that counts those files and names the command that updates them (each file's path is logged at debug level):
+
+  ```text
+  WRN 12 file(s) carry an earlier golic text of the apache2 license; run golic replace -t apache2 -c "2026 MyCompany ltd." to update them
+  ```
+
 * 🧹 **`remove`** removes an earlier text cleanly.
 * 🔁 **`replace`** swaps an earlier text for the current one in place.
 

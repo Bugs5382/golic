@@ -33,28 +33,35 @@ import (
 )
 
 func injectFile(path string, o internal.Options, config *Config) (rule string, skip bool, err error) {
+	rule, skip, _, err = inject(path, o, config)
+	return
+}
+
+// inject stamps the license into path. earlier reports a file that carries an
+// earlier golic text of the license, which inject leaves alone.
+func inject(path string, o internal.Options, config *Config) (rule string, skip, earlier bool, err error) {
 	source, err := read(path)
 	if err != nil {
-		return "", false, err
+		return "", false, false, err
 	}
 	rule = getRule(config, path)
 	license, err := getCommentedLicense(config, o, rule)
 	if err != nil {
-		return "", false, err
+		return "", false, false, err
 	}
 	olds, err := supersededHeaders(config, o, rule)
 	if err != nil {
-		return "", false, err
+		return "", false, false, err
 	}
 	for _, old := range olds {
 		if strings.Contains(source, old) {
-			logging.L().Warn("file carries an earlier golic text of this license; run golic replace to update it", golog.F("path", path), golog.F("template", o.Template))
-			return rule, true, nil
+			logging.L().Debug("file carries an earlier golic text of this license", golog.F("path", path), golog.F("template", o.Template))
+			return rule, true, true, nil
 		}
 	}
 	// license is injected, continue
 	if strings.Contains(source, license) {
-		return rule, true, nil
+		return rule, true, false, nil
 	}
 	source = insertLicense(source, license, config.Golic.Rules[rule])
 
@@ -249,6 +256,7 @@ func (u *Process) readLocalConfig() (*Config, error) {
 func (u *Process) traverseFiles() error {
 	skipped := 0
 	visited := 0
+	earlier := 0
 	outOfScope := 0
 	generated := 0
 	p := func(path string, o internal.Options, config *Config) (err error) {
@@ -273,16 +281,20 @@ func (u *Process) traverseFiles() error {
 		}
 
 		var rule string
-		var skip bool
+		var skip, old bool
 		symbol := ""
 		prefix := ""
 		cp := aurora.BrightYellow(path)
 
 		visited++
 
-		if rule, skip, err = processUpdate(path, o, config); err != nil {
+		if rule, skip, old, err = processUpdate(path, o, config); err != nil {
 			return err
-		} else if skip {
+		}
+		if old {
+			earlier++
+		}
+		if skip {
 			symbol = "-> skip"
 			cp = aurora.Magenta(path)
 			skipped++
@@ -334,23 +346,31 @@ func (u *Process) traverseFiles() error {
 	}
 
 	u.modified = visited - skipped
-	logging.L().Debug("walk finished", golog.F("visited", visited), golog.F("unchanged", skipped), golog.F("outOfScope", outOfScope), golog.F("generated", generated))
+	logging.L().Debug("walk finished", golog.F("visited", visited), golog.F("unchanged", skipped), golog.F("outOfScope", outOfScope), golog.F("generated", generated), golog.F("earlier", earlier))
 	displaySummary(skipped, visited)
+	if earlier > 0 {
+		logging.L().Warn(fmt.Sprintf("%d file(s) carry an earlier golic text of the %s license; run golic replace -t %s -c \"%s\" to update them",
+			earlier, u.Opts.Template, u.Opts.Template, u.Opts.Copyright),
+			golog.F("count", earlier), golog.F("template", u.Opts.Template))
+	}
 
 	return nil
 }
 
-// processUpdate Update the file, but how?
-func processUpdate(path string, o internal.Options, config *Config) (rule string, skip bool, err error) {
+// processUpdate Update the file, but how? earlier is set when inject finds an
+// earlier golic text of the license.
+func processUpdate(path string, o internal.Options, config *Config) (rule string, skip, earlier bool, err error) {
 	switch o.Type {
 	case internal.LicenseInject:
-		return injectFile(path, o, config)
+		return inject(path, o, config)
 	case internal.LicenseRemove:
-		return removeFile(path, o, config)
+		rule, skip, err = removeFile(path, o, config)
 	case internal.LicenseReplace:
-		return replaceFile(path, o, config)
+		rule, skip, err = replaceFile(path, o, config)
+	default:
+		return "", true, false, fmt.Errorf("invalid license type")
 	}
-	return "", true, fmt.Errorf("invalid license type")
+	return rule, skip, false, err
 }
 
 func displaySummary(skipped, visited int) {

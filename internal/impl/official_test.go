@@ -17,12 +17,18 @@ limitations under the License.
 */
 
 import (
+	"bytes"
+	"context"
+	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
 
+	golog "github.com/Bugs5382/go-log"
 	"github.com/Bugs5382/golic/internal"
+	"github.com/Bugs5382/golic/internal/logging"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -137,4 +143,108 @@ func TestUpgradeEveryChangedTemplate(t *testing.T) {
 			})
 		}
 	}
+}
+
+// captureLogs sends golic's log output to a buffer as JSON lines, at debug
+// level when debug is set and at info otherwise.
+func captureLogs(t *testing.T, debug bool) *bytes.Buffer {
+	t.Helper()
+	t.Setenv("LOG_LEVEL", "")
+	t.Setenv("LOG_FORMAT", "")
+	level := golog.LevelInfo
+	if debug {
+		level = golog.LevelDebug
+	}
+	buf := new(bytes.Buffer)
+	logging.Use(golog.NewLoggerWithOptions("golic",
+		golog.WithOutput(buf),
+		golog.WithDefaultFormat(golog.FormatJSON),
+		golog.WithDefaultLevel(level),
+	), debug)
+	t.Cleanup(func() { logging.Init(false) })
+	return buf
+}
+
+// logLines returns the captured lines at level whose message contains text.
+func logLines(t *testing.T, buf *bytes.Buffer, level, text string) []map[string]any {
+	t.Helper()
+	var out []map[string]any
+	for _, raw := range strings.Split(strings.TrimSpace(buf.String()), "\n") {
+		if raw == "" {
+			continue
+		}
+		var line map[string]any
+		require.NoError(t, json.Unmarshal([]byte(raw), &line), raw)
+		if line["level"] == level && strings.Contains(fmt.Sprint(line["message"]), text) {
+			out = append(out, line)
+		}
+	}
+	return out
+}
+
+// TestInjectSummarisesEarlierTexts checks inject reports files with an earlier
+// text in one warning at the end of the run, naming the replace command for
+// the run's template and copyright, and keeps the per-file detail at debug.
+func TestInjectSummarisesEarlierTexts(t *testing.T) {
+	const template = "apache2"
+	old := supersededLicenses[template][0]
+	stamped := map[string]string{}
+	for _, s := range upgradeSamples {
+		stamped[s.name] = s.before + renderText(t, s.name, old, testCopyright) + s.after
+	}
+	summary := fmt.Sprintf("%d file(s) carry an earlier golic text of the %s license; run golic replace -t %s -c \"%s\" to update them",
+		len(stamped), template, template, testCopyright)
+	detail := "file carries an earlier golic text of this license"
+
+	t.Run("one summary line at warn", func(t *testing.T) {
+		buf := captureLogs(t, false)
+		_, modified := runProcess(t, internal.LicenseInject, template, stamped)
+		assert.Equal(t, 0, modified)
+		lines := logLines(t, buf, "warn", "earlier golic text")
+		require.Len(t, lines, 1, buf.String())
+		assert.Equal(t, summary, lines[0]["message"])
+		assert.Empty(t, logLines(t, buf, "debug", detail), "per-file detail must stay below info")
+	})
+
+	t.Run("per-file detail at debug", func(t *testing.T) {
+		buf := captureLogs(t, true)
+		runProcess(t, internal.LicenseInject, template, stamped)
+		lines := logLines(t, buf, "debug", detail)
+		require.Len(t, lines, len(stamped), buf.String())
+		for _, l := range lines {
+			assert.Equal(t, template, l["template"])
+			assert.Contains(t, stamped, l["path"])
+		}
+		assert.Empty(t, logLines(t, buf, "warn", detail), "per-file detail must not be a warning")
+		assert.Len(t, logLines(t, buf, "warn", summary), 1)
+	})
+
+	t.Run("dry run with -x still counts", func(t *testing.T) {
+		buf := captureLogs(t, false)
+		ignore := filepath.Join(t.TempDir(), ".licignore")
+		require.NoError(t, os.WriteFile(ignore, nil, 0o600))
+		dir := t.TempDir()
+		for name, content := range stamped {
+			require.NoError(t, os.WriteFile(filepath.Join(dir, name), []byte(content), 0o600))
+		}
+		t.Chdir(dir)
+		u := ProcessFile(context.Background(), internal.Options{
+			Type: internal.LicenseInject, Template: template, Copyright: testCopyright,
+			LicIgnore: ignore, Dry: true, ModifiedExitStatus: true,
+		})
+		require.NoError(t, u.Run())
+		assert.NoError(t, u.Changes(), "earlier texts must not fail CI")
+		assert.Len(t, logLines(t, buf, "warn", summary), 1)
+	})
+
+	t.Run("no summary when every file is current", func(t *testing.T) {
+		current := map[string]string{}
+		for _, s := range upgradeSamples {
+			current[s.name] = s.before + header(t, s.name, template) + s.after
+		}
+		buf := captureLogs(t, true)
+		runProcess(t, internal.LicenseInject, template, current)
+		assert.Empty(t, logLines(t, buf, "warn", "earlier golic text"))
+		assert.Empty(t, logLines(t, buf, "debug", detail))
+	})
 }

@@ -68,6 +68,13 @@ func Init(verbose bool) {
 	debug.Store(on)
 }
 
+// Use makes l the logger every package logs through; debugOn says whether it
+// writes debug lines. Tests use it to capture what a run logs.
+func Use(l golog.TraceLogger, debugOn bool) {
+	current.Store(&l)
+	debug.Store(debugOn)
+}
+
 // build returns the go-log logger for the given verbosity, writing to out. It
 // is split from Init so tests can drive it directly.
 func build(verbose bool, out io.Writer) golog.TraceLogger {
