@@ -1,8 +1,6 @@
 package impl
 
 /*
-Apache License 2.0
-
 Copyright 2026 Shane & Contributors
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -95,11 +93,18 @@ func TestInjectKeepsShebangFirst(t *testing.T) {
 	}
 }
 
+// v100Layout is the file the v1.0.0 binary wrote for name, with its header
+// text swapped for the current one: the layout golic must still produce.
+func v100Layout(t *testing.T, template, name string) string {
+	t.Helper()
+	old := renderText(t, name, supersededLicenses[template][0], testCopyright)
+	return strings.Replace(stampedByV100[template][name], old, header(t, name, template), 1)
+}
+
 // TestInjectShebangMatchesV100Header pins the exact bytes against what the
-// v1.0.0 binary wrote for the same file without a shebang: the header text is
-// unchanged and only moves below the shebang.
+// v1.0.0 binary wrote for the same file without a shebang, with the current
+// header text: the header only moves below the shebang.
 func TestInjectShebangMatchesV100Header(t *testing.T) {
-	stamped := stampedByV100["apache2"]
 	cases := []struct{ name, shebang, plain, body string }{
 		{"local.sh", "#!/usr/local/bin/bash", "plain.sh", "echo hi\n"},
 		{"cli.js", "#!/usr/bin/env node", "a.js", "const a = 1;\n"},
@@ -108,7 +113,7 @@ func TestInjectShebangMatchesV100Header(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			got, _ := runProcess(t, internal.LicenseInject, "apache2", map[string]string{c.name: c.shebang + "\n" + c.body})
-			assert.Equal(t, c.shebang+"\n"+stamped[c.plain], got[c.name])
+			assert.Equal(t, c.shebang+"\n"+v100Layout(t, "apache2", c.plain), got[c.name])
 		})
 	}
 }
@@ -142,7 +147,7 @@ func TestInjectKeepsXMLDeclarationFirst(t *testing.T) {
 	assert.Equal(t, header(t, "plain.svg", "apache2")+files["plain.svg"], got["plain.svg"])
 	assert.True(t, strings.HasPrefix(got["pom.xml"], "<?xml"), "the declaration must stay first")
 	// Same header bytes v1.0.0 used for .xml, now below the declaration.
-	assert.Equal(t, decl+"\n"+stampedByV100["apache2"]["plain.xml"], strings.Replace(got["pom.xml"], "<project/>", "<a/>", 1))
+	assert.Equal(t, decl+"\n"+v100Layout(t, "apache2", "plain.xml"), strings.Replace(got["pom.xml"], "<project/>", "<a/>", 1))
 }
 
 // TestInjectKeepsDockerfileDirectivesFirst checks BuildKit parser directives
@@ -197,8 +202,8 @@ func TestNestedBuildFilesMatch(t *testing.T) {
 		"sub/Makefile":     "all:\n\ttrue\n",
 	})
 	assert.Equal(t, 2, modified)
-	assert.Equal(t, stampedByV100["apache2"]["Dockerfile"], got["build/Dockerfile"])
-	assert.Equal(t, stampedByV100["apache2"]["Makefile"], got["sub/Makefile"])
+	assert.Equal(t, v100Layout(t, "apache2", "Dockerfile"), got["build/Dockerfile"])
+	assert.Equal(t, v100Layout(t, "apache2", "Makefile"), got["sub/Makefile"])
 }
 
 // TestBuiltinRulesForNewFileTypes checks each added file type renders with the
@@ -262,23 +267,22 @@ func TestDataAndDocFormatsStayUnmatched(t *testing.T) {
 
 // TestNoChurnOnFilesStampedByV100 replays files the v1.0.0 binary stamped,
 // one per built-in rule, including the ones it placed wrongly (above a
-// shebang, an XML declaration or a Dockerfile directive). The current rules
-// must see every one as done: no file is rewritten and no header is doubled.
+// shebang, an XML declaration or a Dockerfile directive). inject must see
+// every one as done: no file is rewritten and no header is doubled. replace
+// moves them to the current text; TestUpgradeFromV100Stamps covers that.
 func TestNoChurnOnFilesStampedByV100(t *testing.T) {
 	cfg := embeddedConfig(t)
 	for template, files := range stampedByV100 {
 		for name := range files {
 			require.NotEmpty(t, getRule(cfg, name), "%s lost its rule", name)
 		}
-		for _, kind := range []internal.LicenseCommandType{internal.LicenseInject, internal.LicenseReplace} {
-			t.Run(template, func(t *testing.T) {
-				got, modified := runProcess(t, kind, template, files)
-				assert.Equal(t, 0, modified, "no file should change")
-				for name, want := range files {
-					assert.Equal(t, want, got[name], "%s was rewritten", name)
-				}
-			})
-		}
+		t.Run(template, func(t *testing.T) {
+			got, modified := runProcess(t, internal.LicenseInject, template, files)
+			assert.Equal(t, 0, modified, "no file should change")
+			for name, want := range files {
+				assert.Equal(t, want, got[name], "%s was rewritten", name)
+			}
+		})
 	}
 }
 

@@ -186,7 +186,7 @@ golic replace -c "2026 MyCompany ltd." -t apacheX --dry
 golic replace -c "2026 MyCompany ltd." -t apacheX
 ```
 
-`replace` looks for a header golic itself rendered: any license in the config (built-in or local), written for the file's comment style, with any copyright value. It swaps that exact text in place and keeps everything around it, so comments below the header, blank lines, shebangs and XML declarations stay as they were. For each file:
+`replace` looks for a header golic itself rendered: any license in the config (built-in or local), or an earlier text of a built-in license, written for the file's comment style, with any copyright value. It swaps that exact text in place and keeps everything around it, so comments below the header, blank lines, shebangs and XML declarations stay as they were. For each file:
 
 * 🔁 **A golic header:** swapped for the configured one, in place.
 * ✅ **Already the target header:** left alone and not counted as a change.
@@ -253,6 +253,40 @@ With `-x`, golic exits 1 when any file would change and lists the count, for exa
 
 CI jobs should treat any non-zero status as a failure. Scripts that need to tell "headers missing" apart from "golic could not run" can check for `1` and `2`.
 
+## ⬆️ Upgrading from v1.1
+
+From v1.2 every built-in license is the official text, byte for byte: the per-file notice where the licence publishes one, otherwise the licence text itself. Each license in the [embedded master configuration](internal/impl/default.golic.yaml) names its source.
+
+| Key | What changed |
+| :--- | :--- |
+| `apache2` | The `Apache License 2.0` title line is gone. The header is the notice from the "How to apply" appendix of the Apache License. |
+| `mit`, `bsd2`, `bsd3`, `unlicense` | The last sentence of the disclaimer is the licence's own again (it had the ISC wording). `bsd2`/`bsd3` use the licence's title, and `unlicense` drops its title and links to `https://unlicense.org/`. |
+| `gpl2`, `gpl3`, `lgpl3`, `agpl3` | The first line sits directly above the copyright line, as in the GNU notice. `gpl2` ends with the current gnu.org link instead of the postal address, and `agpl3` uses gnu.org's line breaks. |
+| `mpl2` | The `Mozilla Public License 2.0` title line is gone. |
+| `epl2` | The Eclipse handbook's standard header: an `https://` link, and no Secondary License paragraph. If you relied on the GPL-2.0 with Classpath secondary licence, define your own license in `.golic.yaml`. |
+| `isc`, `copyright` | Unchanged. |
+
+Files stamped by an older golic keep working. golic still recognises the earlier texts:
+
+* 🧷 **`inject`** treats a file with an earlier text as stamped. It never adds a second header, so `inject --dry -x` in CI keeps passing. At the end of the run, dry or not, it logs one warning that counts those files and names the command that updates them (each file's path is logged at debug level):
+
+  ```text
+  WRN 12 file(s) carry an earlier golic text of the apache2 license; run golic replace -t apache2 -c "2026 MyCompany ltd." to update them
+  ```
+
+* 🧹 **`remove`** removes an earlier text cleanly.
+* 🔁 **`replace`** swaps an earlier text for the current one in place.
+
+To move a repository to the new text, run `replace` once with the same template and copyright you stamp with, and commit the result:
+
+```bash
+golic replace -t apache2 -c "2026 MyCompany ltd." --dry   # only the header lines change
+golic replace -t apache2 -c "2026 MyCompany ltd."
+golic inject -t apache2 -c "2026 MyCompany ltd." --dry -x # 0 files need a change
+```
+
+A license you define in your own `.golic.yaml` is not affected.
+
 ## 🏗 Development
 
 The project uses [Task](https://taskfile.dev) (`Taskfile.yaml`). Run `task --list` to see every target.
@@ -289,13 +323,13 @@ task lint
 
 `task lint` stamps missing license headers first, using the binary from `task build`.
 
-To verify only the project licenses without changing any files (exit 1 when a header is missing), use:
+To verify only the project licenses without changing any files (exit 1 when a header is missing or `LICENSE` is not the official Apache text), use:
 
 ```bash
 task license-dry
 ```
 
-To add any missing headers, run `task license`.
+To add any missing headers and rewrite `LICENSE`, run `task license`.
 
 ### Test
 

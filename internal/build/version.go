@@ -1,8 +1,6 @@
 package build
 
 /*
-Apache License 2.0
-
 Copyright 2026 Shane & Contributors
 
 Licensed under the Apache License, Version 2.0 (the "License");

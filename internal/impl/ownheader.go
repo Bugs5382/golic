@@ -1,8 +1,6 @@
 package impl
 
 /*
-Apache License 2.0
-
 Copyright 2026 Shane & Contributors
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,7 +23,6 @@ import (
 	"sync"
 
 	golog "github.com/Bugs5382/go-log"
-	"github.com/Bugs5382/golic/internal"
 	"github.com/Bugs5382/golic/internal/logging"
 )
 
@@ -63,19 +60,27 @@ func headerPattern(rendered string) (*regexp.Regexp, error) {
 }
 
 // findOwnHeader looks for a header golic could have written into path: any
-// configured license rendered for the file's rule, with any copyright. The
+// configured license, or an earlier text of a built-in one, rendered for the
+// file's rule, with any copyright. The
 // earliest match wins, and the longest one at that offset, so a template whose
 // text sits inside another's is never picked over the one that wrote the file.
 func findOwnHeader(source, path string, config *Config) (ownHeader, error) {
-	keys := make([]string, 0, len(config.Golic.Licenses))
-	for k := range config.Golic.Licenses {
-		keys = append(keys, k)
+	type candidate struct{ name, text string }
+	var candidates []candidate
+	for k, text := range config.Golic.Licenses {
+		candidates = append(candidates, candidate{k, text})
 	}
-	sort.Strings(keys)
+	for k, olds := range supersededLicenses {
+		for _, text := range olds {
+			candidates = append(candidates, candidate{k + " (earlier text)", text})
+		}
+	}
+	sort.Slice(candidates, func(i, j int) bool { return candidates[i].name < candidates[j].name })
 
 	best := ownHeader{}
-	for _, k := range keys {
-		rendered, err := getCommentedLicense(config, internal.Options{Template: k, Copyright: copyrightMark}, path)
+	for _, c := range candidates {
+		k := c.name
+		rendered, err := renderHeader(config, c.text, copyrightMark, path)
 		if err != nil {
 			return ownHeader{}, err
 		}

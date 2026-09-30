@@ -1,8 +1,6 @@
 package impl
 
 /*
-Apache License 2.0
-
 Copyright 2026 Shane & Contributors
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,18 +33,35 @@ import (
 )
 
 func injectFile(path string, o internal.Options, config *Config) (rule string, skip bool, err error) {
+	rule, skip, _, err = inject(path, o, config)
+	return
+}
+
+// inject stamps the license into path. earlier reports a file that carries an
+// earlier golic text of the license, which inject leaves alone.
+func inject(path string, o internal.Options, config *Config) (rule string, skip, earlier bool, err error) {
 	source, err := read(path)
 	if err != nil {
-		return "", false, err
+		return "", false, false, err
 	}
 	rule = getRule(config, path)
 	license, err := getCommentedLicense(config, o, rule)
 	if err != nil {
-		return "", false, err
+		return "", false, false, err
+	}
+	olds, err := supersededHeaders(config, o, rule)
+	if err != nil {
+		return "", false, false, err
+	}
+	for _, old := range olds {
+		if strings.Contains(source, old) {
+			logging.L().Debug("file carries an earlier golic text of this license", golog.F("path", path), golog.F("template", o.Template))
+			return rule, true, true, nil
+		}
 	}
 	// license is injected, continue
 	if strings.Contains(source, license) {
-		return rule, true, nil
+		return rule, true, false, nil
 	}
 	source = insertLicense(source, license, config.Golic.Rules[rule])
 
@@ -76,6 +91,18 @@ func removeFile(path string, o internal.Options, config *Config) (rule string, s
 	license, err := getCommentedLicense(config, o, rule)
 	if err != nil {
 		return rule, false, err
+	}
+	olds, err := supersededHeaders(config, o, rule)
+	if err != nil {
+		return rule, false, err
+	}
+	// An earlier text can contain the current one (a line-comment header that
+	// only lost its title), so it is checked first.
+	for _, old := range olds {
+		if strings.Contains(source, old) {
+			logging.L().Debug("removing an earlier golic text of this license", golog.F("path", path), golog.F("template", o.Template))
+			return "", false, RemoveFromFile(path, o, source, old, err)
+		}
 	}
 	if strings.Contains(source, license) {
 		return "", false, RemoveFromFile(path, o, source, license, err)
@@ -229,6 +256,7 @@ func (u *Process) readLocalConfig() (*Config, error) {
 func (u *Process) traverseFiles() error {
 	skipped := 0
 	visited := 0
+	earlier := 0
 	outOfScope := 0
 	generated := 0
 	p := func(path string, o internal.Options, config *Config) (err error) {
@@ -253,16 +281,20 @@ func (u *Process) traverseFiles() error {
 		}
 
 		var rule string
-		var skip bool
+		var skip, old bool
 		symbol := ""
 		prefix := ""
 		cp := aurora.BrightYellow(path)
 
 		visited++
 
-		if rule, skip, err = processUpdate(path, o, config); err != nil {
+		if rule, skip, old, err = processUpdate(path, o, config); err != nil {
 			return err
-		} else if skip {
+		}
+		if old {
+			earlier++
+		}
+		if skip {
 			symbol = "-> skip"
 			cp = aurora.Magenta(path)
 			skipped++
@@ -314,23 +346,31 @@ func (u *Process) traverseFiles() error {
 	}
 
 	u.modified = visited - skipped
-	logging.L().Debug("walk finished", golog.F("visited", visited), golog.F("unchanged", skipped), golog.F("outOfScope", outOfScope), golog.F("generated", generated))
+	logging.L().Debug("walk finished", golog.F("visited", visited), golog.F("unchanged", skipped), golog.F("outOfScope", outOfScope), golog.F("generated", generated), golog.F("earlier", earlier))
 	displaySummary(skipped, visited)
+	if earlier > 0 {
+		logging.L().Warn(fmt.Sprintf("%d file(s) carry an earlier golic text of the %s license; run golic replace -t %s -c \"%s\" to update them",
+			earlier, u.Opts.Template, u.Opts.Template, u.Opts.Copyright),
+			golog.F("count", earlier), golog.F("template", u.Opts.Template))
+	}
 
 	return nil
 }
 
-// processUpdate Update the file, but how?
-func processUpdate(path string, o internal.Options, config *Config) (rule string, skip bool, err error) {
+// processUpdate Update the file, but how? earlier is set when inject finds an
+// earlier golic text of the license.
+func processUpdate(path string, o internal.Options, config *Config) (rule string, skip, earlier bool, err error) {
 	switch o.Type {
 	case internal.LicenseInject:
-		return injectFile(path, o, config)
+		return inject(path, o, config)
 	case internal.LicenseRemove:
-		return removeFile(path, o, config)
+		rule, skip, err = removeFile(path, o, config)
 	case internal.LicenseReplace:
-		return replaceFile(path, o, config)
+		rule, skip, err = replaceFile(path, o, config)
+	default:
+		return "", true, false, fmt.Errorf("invalid license type")
 	}
-	return "", true, fmt.Errorf("invalid license type")
+	return rule, skip, false, err
 }
 
 func displaySummary(skipped, visited int) {
@@ -374,18 +414,36 @@ func matchRule(config *Config, path string) (rule string, ok bool) {
 
 // getCommentedLicense Get Commented License File
 func getCommentedLicense(config *Config, o internal.Options, file string) (string, error) {
-	var ok bool
-	var template string
-	var rule string
-	if template, ok = config.Golic.Licenses[o.Template]; !ok {
+	template, ok := config.Golic.Licenses[o.Template]
+	if !ok {
 		return "", fmt.Errorf("no license found for %s, check configuration (.golic.yaml)", o.Template)
 	}
+	return renderHeader(config, template, o.Copyright, file)
+}
 
-	//if _, ok =  config.Golic.Rules[rule]; !ok {
-	if rule, ok = matchRule(config, file); !ok {
+// supersededHeaders renders the earlier built-in texts of the chosen license
+// for file, newest first.
+func supersededHeaders(config *Config, o internal.Options, file string) ([]string, error) {
+	olds := supersededLicenses[o.Template]
+	out := make([]string, 0, len(olds))
+	for _, text := range olds {
+		h, err := renderHeader(config, text, o.Copyright, file)
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, h)
+	}
+	return out, nil
+}
+
+// renderHeader writes a license text as a comment in the style of the rule
+// that matches file.
+func renderHeader(config *Config, template, copyright, file string) (string, error) {
+	rule, ok := matchRule(config, file)
+	if !ok {
 		return "", fmt.Errorf("no rule found for %s, check configuration (.golic.yaml)", rule)
 	}
-	template = strings.ReplaceAll(template, "{{copyright}}", o.Copyright)
+	template = strings.ReplaceAll(template, "{{copyright}}", copyright)
 	if config.IsWrapped(rule) {
 		return fmt.Sprintf("%s\n%s%s\n",
 				config.Golic.Rules[rule].Prefix,

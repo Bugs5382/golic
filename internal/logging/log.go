@@ -1,8 +1,6 @@
 package logging
 
 /*
-Apache License 2.0
-
 Copyright 2026 Shane & Contributors
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -68,6 +66,13 @@ func Init(verbose bool) {
 	}
 	current.Store(&l)
 	debug.Store(on)
+}
+
+// Use makes l the logger every package logs through; debugOn says whether it
+// writes debug lines. Tests use it to capture what a run logs.
+func Use(l golog.TraceLogger, debugOn bool) {
+	current.Store(&l)
+	debug.Store(debugOn)
 }
 
 // build returns the go-log logger for the given verbosity, writing to out. It
