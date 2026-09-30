@@ -1,5 +1,21 @@
 # Golic Change Log
 
+## v1.2.0 - 2026-09-30
+
+### What Changed 👀
+
+#### 🚀 Features
+
+- feat(license-file): optionally write and check the LICENSE file @Bugs5382 (#53)
+
+#### 🐛 Bug Fixes
+
+- fix(replace): swap only golic's own header and keep the file's other comments and spacing @Bugs5382 (#50)
+
+### Extra
+
+**Full Changelog**: https://github.com/Bugs5382/golic/compare/v1.1.0...v1.2.0
+
 ## v1.1.0 - 2026-09-30
 
 ### What Changed 👀
