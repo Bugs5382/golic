@@ -201,6 +201,38 @@ golic replace -c "2026 MyCompany ltd." -t apacheX
 golic remove -t apacheX
 ```
 
+### LICENSE File
+
+`inject` and `replace` can also keep the repository's LICENSE file in line with the template. It is off by default. Turn it on with `--license-file`, which writes `LICENSE` in the directory golic runs in, or `--license-file=PATH` for another name:
+
+```bash
+golic inject -t apache2 -c "2026 MyCompany ltd." --license-file
+golic inject -t mit -c "2026 MyCompany ltd." --license-file=LICENSE.txt
+```
+
+Or set it in `.golic.yaml` (`true` for `LICENSE`, or a path). The flag wins over the config:
+
+```yaml
+# .golic.yaml
+golic:
+  licenseFile: true
+```
+
+* 📜 **Official text, byte for byte:** the full licence text is embedded as published by its steward, and never reworded.
+* ✍️ **Copyright only where the text asks for it:** `-c` fills the copyright line of the MIT, BSD and ISC texts. The Apache and GNU texts keep the placeholders in their "how to apply" appendix (`Copyright [yyyy] [name of copyright owner]`), because that is the official text; your copyright goes in the file headers and, for Apache, in a NOTICE file.
+* 🚦 **Checked like a header:** a missing LICENSE, or one that differs from the official text, counts as a change. `--dry` writes nothing, and `-x` exits 1, so CI catches a reworded LICENSE.
+
+| Key | Source of the LICENSE text |
+| :--- | :--- |
+| `apache2` | https://www.apache.org/licenses/LICENSE-2.0.txt |
+| `gpl2`, `gpl3`, `lgpl3`, `agpl3` | https://www.gnu.org/licenses/ (`gpl-2.0.txt`, `gpl-3.0.txt`, `lgpl-3.0.txt`, `agpl-3.0.txt`) |
+| `mpl2` | https://www.mozilla.org/media/MPL/2.0/index.txt |
+| `epl2` | https://www.eclipse.org/org/documents/epl-2.0/EPL-2.0.txt |
+| `unlicense` | https://unlicense.org/UNLICENSE |
+| `mit`, `bsd2`, `bsd3`, `isc` | SPDX license-list-data (`text/MIT.txt`, `BSD-2-Clause.txt`, `BSD-3-Clause.txt`, `ISC.txt`) |
+
+The LGPL is a set of additions to the GPL, so an LGPL project usually ships the GPL text too (as `COPYING`). The `copyright` template and licenses defined in your own `.golic.yaml` have no official text: with the option on, golic stops with an error for them.
+
 ### CI/CD Integration
 
 To fail a build if licenses are missing (e.g., a developer forgot to run Golic), add `-x` (`--modified-exit`) to a dry run:
@@ -290,6 +322,7 @@ task test
 * `-x, --modified-exit` : Exit with status 1 when any file is modified, or would be in a dry run. Errors exit with 2.
 * `-l, --licignore` : Path to the `.licignore` file (Default: `.licignore`).
 * `-p, --config-path` : Path to a local config merged over the built-in rules and licenses (Default: `.golic.yaml`).
+* `--license-file[=PATH]` : `inject` and `replace` only. Also write the full official licence text to `PATH` (Default when given without a value: `LICENSE`). Off unless set here or by `licenseFile` in the config.
 * `-v, --verbose` : Enable detailed trace logging.
 
 Running `golic` with no command prints the help.

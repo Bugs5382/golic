@@ -38,6 +38,9 @@ type Options struct {
 	ModifiedExitStatus bool
 	Type               LicenseCommandType
 	Verbose            bool
+	// LicenseFile is where inject and replace write the full licence text.
+	// Empty leaves the LICENSE file alone unless the config turns it on.
+	LicenseFile string
 }
 
 var Year = time.Now().Year()

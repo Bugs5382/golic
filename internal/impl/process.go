@@ -89,9 +89,11 @@ func (u *Process) Run() (err error) {
 		return err
 	}
 
-	err = u.traverseFiles()
+	if err = u.traverseFiles(); err != nil {
+		return err
+	}
 
-	return
+	return u.syncLicenseFile()
 }
 
 func (u *Process) String() string {

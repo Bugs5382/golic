@@ -36,3 +36,11 @@ func addCommonFlags(cmd *cobra.Command, opts *internal.Options) {
 	f.StringVarP(&opts.Copyright, "copyright", "c", fmt.Sprintf("%d %s", internal.Year, "[Insert Company]"), "Copyright holder and year for the license header")
 	f.StringVarP(&opts.ConfigPath, "config-path", "p", ".golic.yaml", "Path to a local config merged over the built-in rules and licenses")
 }
+
+// addLicenseFileFlag adds --license-file to the commands that write headers.
+// With no value it names LICENSE in the directory golic runs in.
+func addLicenseFileFlag(cmd *cobra.Command, opts *internal.Options) {
+	f := cmd.Flags()
+	f.StringVar(&opts.LicenseFile, "license-file", "", "Also write the full official licence text for the template to this file (LICENSE when no path is given), and count a missing or different file as a change")
+	f.Lookup("license-file").NoOptDefVal = "LICENSE"
+}
