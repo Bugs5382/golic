@@ -44,6 +44,12 @@ type GolicConfig struct {
 	// with no local rules, the built-in rules are kept. Licenses always merge.
 	MergeRules bool            `yaml:"mergeRules"`
 	Rules      map[string]Rule `yaml:"rules"`
+	// Ignore lists doublestar globs, relative to the directory golic runs
+	// in, for files that are never processed (#46). The built-in list covers
+	// VCS metadata, vendored and built trees, lock files and generated code.
+	// A local .golic.yaml adds to it. A specific "!" line in .licignore can
+	// lift an entry for the paths it names.
+	Ignore []string `yaml:"ignore"`
 }
 
 type Config struct {

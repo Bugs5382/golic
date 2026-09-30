@@ -25,14 +25,11 @@ import (
 
 	"github.com/Bugs5382/golic/internal"
 	"github.com/Bugs5382/golic/internal/build"
-	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestVersion(t *testing.T) {
 	_ = os.Chdir(internal.GetProjectRoot())
-
-	zerolog.SetGlobalLevel(zerolog.Disabled)
 
 	t.Parallel()
 

@@ -24,11 +24,11 @@ import (
 	"io"
 	"os"
 
+	golog "github.com/Bugs5382/go-log"
 	"github.com/Bugs5382/golic/internal"
 	"github.com/Bugs5382/golic/internal/commands"
 	"github.com/Bugs5382/golic/internal/logging"
 	"github.com/enescakir/emoji"
-	"github.com/rs/zerolog/log"
 )
 
 // Exit statuses. They are part of the CLI contract: CI jobs run
@@ -55,18 +55,18 @@ func run(args []string, stdout, stderr io.Writer) int {
 
 	err := root.Execute()
 	if err == nil {
-		log.Debug().Int("exit", exitClean).Msg("golic finished clean")
+		logging.L().Debug("golic finished clean", golog.F("exit", exitClean))
 		return exitClean
 	}
 
 	var changes *internal.ChangesError
 	if errors.As(err, &changes) {
-		log.Debug().Int("exit", exitChanges).Int("files", changes.Count).Bool("dry", changes.Dry).Msg("golic finished with changes")
+		logging.L().Debug("golic finished with changes", golog.F("exit", exitChanges), golog.F("files", changes.Count), golog.F("dry", changes.Dry))
 		_, _ = fmt.Fprintf(stderr, "%v  %v\n", emoji.Warning, err)
 		return exitChanges
 	}
 
-	log.Debug().Int("exit", exitError).Err(err).Msg("golic failed")
+	logging.L().Debug("golic failed", golog.F("exit", exitError), golog.F("error", err.Error()))
 	_, _ = fmt.Fprintf(stderr, "%v  Error: %v\n", emoji.Bomb, err)
 	return exitError
 }

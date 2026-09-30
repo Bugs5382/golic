@@ -21,7 +21,8 @@ limitations under the License.
 import (
 	_ "embed"
 
-	"github.com/rs/zerolog/log"
+	"github.com/Bugs5382/golic/internal/logging"
+
 	"github.com/spf13/cobra"
 )
 
@@ -36,7 +37,7 @@ func RootCmd() *cobra.Command {
 		// With no command, show the help and exit 0. Unknown commands are
 		// rejected by cobra before this runs.
 		RunE: func(cmd *cobra.Command, args []string) error {
-			log.Debug().Msg("no command given, printing help")
+			logging.L().Debug("no command given, printing help")
 			return cmd.Help()
 		},
 	}
